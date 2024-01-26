@@ -7,9 +7,23 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import DeleteIcon from '@mui/icons-material/Clear';
 import axios from "axios";
 import OPENAI_API_KEY from "./config/openai";
+
+let colorIndex = 0;
+const colorMap = {}; // Dictionary to store color assignments
+const fixedColors = [
+  '#ffad2a',
+  '#3cbefc',
+  '#77e68a',
+  '#9d64e2',
+  '#fb83b3',
+  '#c3effc',
+  '#FF9999',
+  // Add more colors as needed
+];
 
 function removeEmptyPairs(obj) {
   // Create a new object to store non-empty pairs
@@ -205,16 +219,33 @@ let classificationResult = ''
 
   };
 
-  const handleDeleteRule = (index) => {
+  const handleDeleteRule = (index, rule) => {
     const updatedRules = [...rules];
     updatedRules.splice(index, 1);
     setRules(updatedRules);
+    delete colorMap[rule.if_text + rule.then_text];
   };
+
+const getColorForRule = (rule) => {
+    // console.log(rule.if_text + rule.then_text)
+    const rule_id = rule.if_text + rule.then_text
+    console.log(colorIndex)
+
+  if (colorMap.hasOwnProperty(rule_id)) {
+      return colorMap[rule_id];
+  }
+  else {
+    colorMap[rule_id] = fixedColors[colorIndex % 7];
+      colorIndex += 1;
+    return colorMap[rule_id];
+  }
+};
 
   return (
     <div>
-      <Button variant="outlined" onClick={handleClickOpen}>
-        Create new rule
+        <div style={{verticalAlign: 'middle'}}>
+      <Button variant="outlined" onClick={handleClickOpen} style={{ paddingTop: '6px', paddingBottom: '6px', marginRight: '5px'}}>
+        +
       </Button>
       <Dialog
         open={open}
@@ -257,19 +288,30 @@ let classificationResult = ''
           <Button type="submit">Create</Button>
         </DialogActions>
       </Dialog>
+
+        <ButtonGroup aria-label=" primary button group" color="primary" variant="filledTonal" style={{ width: '64%' }}>
+
+
       {rules.map((rule, index) => (
-        <div key={index} style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
+
+        <div key={index} style={{ display: 'flex', alignItems: 'center',
+            borderRadius: '5px', backgroundColor: getColorForRule(rule),
+ marginLeft: '4px', marginRight: '4px'}}>
           <Button
-            variant="outlined"
             onClick={() => handleButtonClick(`If ${rule.if_text} then ${rule.then_text}`)}
+            style={{borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '1px', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
+            title={`If ${rule.if_text} then ${rule.then_text}`} // Set the full text as the title attribute
           >
-            {`If ${rule.if_text} then ${rule.then_text}`}
+            {`If ${rule.if_text.slice(0, 3)}.. then ${rule.then_text.slice(0, 3)}..`}
           </Button>
-          <IconButton onClick={() => handleDeleteRule(index)} color="error">
+          <IconButton onClick={() => handleDeleteRule(index, rule)} color="error" style={{paddingLeft: '3px'}}>
             <DeleteIcon />
           </IconButton>
+
         </div>
       ))}
+                        </ButtonGroup>
+            </div>
       {selectedRuleText && (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <p style={{ marginRight: '10px' }}>
