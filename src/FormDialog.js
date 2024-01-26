@@ -47,7 +47,7 @@ function removeEmptyPairs(obj) {
 }
 
 
-export default function FormDialog({editorData,onApiResponse, onRedoRule}) {
+export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetRuleRevertDisabled, isRuleRevertDisabled}) {
   const [open, setOpen] = useState(false);
   const [rules, setRules] = useState([]);
   const [selectedRuleText, setSelectedRuleText] = useState('');
@@ -78,6 +78,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule}) {
 
   const handleButtonClick = async(ruleText) => {
     setSelectedRuleText(ruleText);
+    onSetRuleRevertDisabled(false);
     // Perform additional actions based on the button click if needed
     // For example, you can display the text in a <p> element.
     console.log(`Clicked on button with text: ${ruleText}`); // THIS IS A RULE WE WILL BE USING
@@ -321,7 +322,7 @@ const getColorForRule = (rule) => {
           <p style={{ marginRight: '10px' }}>
             Selected Rule: <strong>{selectedRuleText}</strong>
           </p>
-          <Button variant="outlined" onClick={handleRevertRule}>
+          <Button variant="outlined" onClick={handleRevertRule} disabled={isRuleRevertDisabled}>
             Revert Rule
           </Button>
         </div>

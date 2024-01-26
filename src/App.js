@@ -21,12 +21,15 @@ class App extends Component {
             isSidebarOpen: true,
             filteredJson: {},
             history: '<p>Hello from CKEditor 5!</p>',
-            historyJson : {}
-
+            historyJson : {},
+            ruleRevertDisabled: false,
         };
     }
-  ckeditorRef = React.createRef(); // avocado
 
+  ckeditorRef = React.createRef(); // avocado
+  handleSetRuleRevertDisabled = (value) => {
+    this.setState({ ruleRevertDisabled: value });
+  };
     // Function to update the appDisplayText state
     updateAppDisplayText = (displayText) => {
         this.setState({ appDisplayText: displayText });
@@ -83,32 +86,33 @@ class App extends Component {
             this.setState({ filteredJson: this.state.historyJson});
         }
 
+        this.setState({ruleRevertDisabled: true})
     };
-    // Inside your class component
- handleItemHover = (key, value) => {
-    console.log(`Hovered over: ${key}: ${value}`);
-    this.setState({ hoveredKey: key });
+        // Inside your class component
+     handleItemHover = (key, value) => {
+        console.log(`Hovered over: ${key}: ${value}`);
+        this.setState({ hoveredKey: key });
 
-    // Get the CKEditor instance
-    const editor = this.ckeditorRef.current.editor;
+        // Get the CKEditor instance
+        const editor = this.ckeditorRef.current.editor;
 
-    // Select the corresponding key in the editor and make it bold
-    const currentData = editor.getData();
-    const modifiedData = currentData.replace(new RegExp(`${key}`, 'g'), `<strong>${key}</strong>`);
-    editor.setData(modifiedData);
-  };
+        // Select the corresponding key in the editor and make it bold
+        const currentData = editor.getData();
+        const modifiedData = currentData.replace(new RegExp(`${key}`, 'g'), `<strong>${key}</strong>`);
+        editor.setData(modifiedData);
+      };
 
-handleItemLeave = () => {
-  this.setState({ hoveredKey: null });
+    handleItemLeave = () => {
+      this.setState({ hoveredKey: null });
 
-  // Get the CKEditor instance
-  const editor = this.ckeditorRef.current.editor;
+      // Get the CKEditor instance
+      const editor = this.ckeditorRef.current.editor;
 
-  // Remove the bold styling from the entire editor content
-  const currentData = editor.getData();
-  const modifiedData = currentData.replace(/<strong>/g, '').replace(/<\/strong>/g, '');
-  editor.setData(modifiedData);
-};
+      // Remove the bold styling from the entire editor content
+      const currentData = editor.getData();
+      const modifiedData = currentData.replace(/<strong>/g, '').replace(/<\/strong>/g, '');
+      editor.setData(modifiedData);
+    };
 
 
     render() {
@@ -142,7 +146,8 @@ handleItemLeave = () => {
             editorData={this.state.editorData}
             onApiResponse={this.handleServerResponse}
               onRedoRule={this.handleRedo} // Pass the handleRedo function as a prop
-
+            isRuleRevertDisabled={this.state.ruleRevertDisabled}
+            onSetRuleRevertDisabled={this.handleSetRuleRevertDisabled} // Pass the handler function as a prop
           />
           {/*  <Button variant="outlined" onClick={this.handleRedo}>*/}
           {/*  Revert Rule*/}
