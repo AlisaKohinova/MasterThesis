@@ -94,7 +94,11 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule}) {
   // }
 let classificationResult = ''
    // Classification first
-      const classification_prompt = 'Classify the following text into 2 classes (the goal of the text of the first class "Changing" is changing the text, the second class "Suggestions" is suggest options (Especially when text contains word "Suggest" - classify it as second class)). Return me only the name ("Suggestions" or "Changing") of 1 selected class.\nThe text: ' + ruleText
+      const classification_prompt = 'You need to classify the following rule into 2 classes: Class Changing or Class Suggestions.\n' +
+          'If the rule\'s goal is to directly change the text, then it\'s class Changing.\n' +
+          'If the rule\'s goal is to suggest something to user, then it\'s class Suggestions.\n' +
+          'You must only return the name of the selected Class.\n' +
+          '\nHere is the rule:' + ruleText
     try {
         const response = await axios.post(
           'https://api.openai.com/v1/chat/completions',
