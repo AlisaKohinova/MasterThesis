@@ -13,7 +13,6 @@ import axios from "axios";
 import OPENAI_API_KEY from "./config/openai";
 
 let colorIndex = 0;
-let lastUsedColor = '';
 const colorMap = {}; // Dictionary to store color assignments
 const fixedColors = [
   '#ffad2a',
@@ -47,17 +46,6 @@ function removeEmptyPairs(obj) {
   return filteredObj;
 }
 
-export function cleanTextFromDifferencesMark(textHtml, color) {
-    console.log('LAST USED COLOR IS')
-    console.log(lastUsedColor)
-        // Create a regular expression to match and replace the span tag with its content
-    const regex = new RegExp('<span[^>]*style\\s*=\\s*["\']\\s*[^"\']*background-color:\\s*' + color + '[^"\']*["\'][^>]*>(.*?)<\\/span>', 'gi');
-
-    // Replace the matched span with its content
-    const clearedHtmlString = textHtml.replace(regex, '$1');
-
-    return clearedHtmlString;
-}
 
 export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetRuleRevertDisabled, isRuleRevertDisabled}) {
   const [open, setOpen] = useState(false);
@@ -88,17 +76,15 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     handleClose();
   };
 
-  const handleButtonClick = async(ruleText, color) => {
+  const handleButtonClick = async(ruleText) => {
     setSelectedRuleText(ruleText);
     onSetRuleRevertDisabled(false);
     // Perform additional actions based on the button click if needed
     // For example, you can display the text in a <p> element.
     console.log(`Clicked on button with text: ${ruleText}`); // THIS IS A RULE WE WILL BE USING
+    const prompt = 'The next is the text we are working on: ' + editorData + '   \nThe rule for modifying the text is: ' + ruleText + '   \n Only return me the modified text without any explanations. Only pure HTML text'
+    console.log(prompt);
 
-    lastUsedColor = color;
-    console.log('CLEANED TEXT ')
-    console.log(cleanTextFromDifferencesMark(editorData, color))
-    editorData = cleanTextFromDifferencesMark(editorData, color);
 
   //   try {
   //   const response = await axios.get("https://openlibrary.org/search.json?q=the+lord+of+the+rings");
@@ -177,7 +163,7 @@ let classificationResult = ''
         console.log(response.data.choices[0].message.content);
         const responseData = response.data.choices[0].message.content;
         const filteredJson = {}
-        onApiResponse(responseData, filteredJson, color);
+        onApiResponse(responseData, filteredJson);
       } catch (error) {
         console.error('Error:', error);
       }
@@ -228,8 +214,7 @@ let classificationResult = ''
         ));
         // filteredJson = removeEmptyPairs(filteredJson)
         console.log(jsonObject)
-
-        onApiResponse(editorData, filteredJson, color);
+        onApiResponse(editorData, filteredJson);
 
       } catch (error) {
         console.error('Error:', error);
@@ -318,7 +303,7 @@ const getColorForRule = (rule) => {
             borderRadius: '5px', backgroundColor: getColorForRule(rule),
  marginLeft: '4px', marginRight: '4px'}}>
           <Button
-            onClick={() => handleButtonClick(`If ${rule.if_text} then ${rule.then_text}`, getColorForRule(rule))}
+            onClick={() => handleButtonClick(`If ${rule.if_text} then ${rule.then_text}`)}
             style={{borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '1px', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
             title={`If ${rule.if_text} then ${rule.then_text}`} // Set the full text as the title attribute
           >
