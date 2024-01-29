@@ -2,13 +2,12 @@
 import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import React, { Component } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
-// import IfElseInput from "./IfElseInput";
 import FormDialog from "./FormDialog";
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-// import Button from '@mui/material/Button'; // Add this import statement
+import Button from '@mui/material/Button';
 
 class App extends Component {
     editor = null;
@@ -36,7 +35,7 @@ class App extends Component {
     };
 
     // Function to handle the server response
-    handleServerResponse = (responseData, filteredJson) => {
+    handleServerResponse = (responseData, filteredJson, color) => {
         console.log('Server Response in App.js:', responseData);
         console.log('Additional Data in App.js:', filteredJson);
         this.updateHistory(this.state.editorData, this.state.filteredJson);
@@ -48,7 +47,7 @@ class App extends Component {
             this.editor.setData(responseData);
             this.setState({ filteredJson: filteredJson});
         }
-
+                this.highlightTextDifferences(this.state.editorData, responseData, color)
     };
 
     toggleSidebar = () => {
@@ -59,22 +58,50 @@ class App extends Component {
 
  // Function to handle the button click to change text color to red
   handleRedButton = () => {
-    if (this.editor) {
-      // Get the current editor data
-      const currentData = this.editor.getData();
+    // if (this.editor) {
+    //   // Get the current editor data
+    //   const currentData = this.editor.getData();
+    //
+    //   // Modify the editor data to change text color to red
+    //   const modifiedData = `<span style="color: red;">${currentData}</span>`;
+    //
+    //   // Set the modified data back to the editor
+    //   this.editor.setData(modifiedData);
+    // }
 
-      // Modify the editor data to change text color to red
-      const modifiedData = `<span style="color: red;">${currentData}</span>`;
-
-      // Set the modified data back to the editor
-      this.editor.setData(modifiedData);
-    }
   };
 
     updateHistory = (responseData, filteredJson) => {
         console.log('History upd')
         this.setState({ history: responseData});
         this.setState({ historyJson: filteredJson});
+    };
+
+    highlightTextDifferences = (originalHtml, modifiedHtml, color) => {
+        // THE DIFF LIBRARY
+        const diff = require('diff');
+
+        const differences = diff.diffChars(originalHtml, modifiedHtml);
+        let resultHtml = '';
+
+        differences.forEach(part => {
+            const partHtml = part.value;
+
+            if (part.added) {
+              resultHtml += `<span style="background-color: ${color};">${partHtml}</span>`;
+              console.log(partHtml)
+            } else if (part.removed) {
+                // TODO if there are 2 removed parts in a raw then leave only one
+              resultHtml += `<span style="background-color: ${color};">_</span>`;
+            } else {
+              resultHtml += partHtml;
+            }
+        });
+        if (this.editor) {
+            this.editor.setData(resultHtml);
+        }
+
+        console.log(resultHtml)
     };
 
     handleRedo = () => {
@@ -139,9 +166,9 @@ class App extends Component {
       <div style={{ display: 'flex', height: '100vh' }}>
 
         <div style={{ flex: 1, padding: '20px', boxSizing: 'border-box', width: '70%' }}>
-          {/*  <Button variant="outlined" onClick={this.handleRedButton}>*/}
-          {/*  Change Text Color to Red*/}
-          {/*</Button>*/}
+            <Button variant="outlined" onClick={this.handleRedButton}>
+            Change Text Color to Red
+          </Button>
           <FormDialog
             editorData={this.state.editorData}
             onApiResponse={this.handleServerResponse}
