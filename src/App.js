@@ -2,7 +2,7 @@
 import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import React, { Component } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
-import FormDialog from "./FormDialog";
+import FormDialog, {cleanTextFromDifferencesMark} from "./FormDialog";
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -75,7 +75,7 @@ class App extends Component {
         // THE DIFF LIBRARY
         const diff = require('diff');
 
-        const differences = diff.diffChars(originalHtml, modifiedHtml);
+        const differences = diff.diffChars(cleanTextFromDifferencesMark(originalHtml, color), modifiedHtml);
         let resultHtml = '';
 
         differences.forEach(part => {
