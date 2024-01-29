@@ -25,10 +25,11 @@ class App extends Component {
         };
     }
 
-  ckeditorRef = React.createRef(); // avocado
-  handleSetRuleRevertDisabled = (value) => {
+    ckeditorRef = React.createRef();
+    handleSetRuleRevertDisabled = (value) => {
     this.setState({ ruleRevertDisabled: value });
-  };
+    };
+
     // Function to update the appDisplayText state
     updateAppDisplayText = (displayText) => {
         this.setState({ appDisplayText: displayText });
@@ -50,14 +51,8 @@ class App extends Component {
                 this.highlightTextDifferences(this.state.editorData, responseData, color)
     };
 
-    toggleSidebar = () => {
-    this.setState((prevState) => ({
-      isSidebarOpen: !prevState.isSidebarOpen,
-    }));
-  };
-
- // Function to handle the button click to change text color to red
-  handleRedButton = () => {
+    // Function to handle the button click to change text color to red
+    handleRedButton = () => {
     // if (this.editor) {
     //   // Get the current editor data
     //   const currentData = this.editor.getData();
@@ -68,8 +63,7 @@ class App extends Component {
     //   // Set the modified data back to the editor
     //   this.editor.setData(modifiedData);
     // }
-
-  };
+    };
 
     updateHistory = (responseData, filteredJson) => {
         console.log('History upd')
@@ -141,9 +135,8 @@ class App extends Component {
       editor.setData(modifiedData);
     };
 
-
     render() {
-         const { isSidebarOpen } = this.state;
+        const { isSidebarOpen } = this.state;
 
         const editorConfig = {
             toolbar: [ 'bold', 'italic', 'underline', '|', 'fontColor', 'FontBackgroundColor']
@@ -157,11 +150,10 @@ class App extends Component {
       onMouseOver={() => this.handleItemHover(key, value)}
       onMouseLeave={this.handleItemLeave}
       style={{ backgroundColor: this.state.hoveredKey === key ? 'yellow' : 'white' }}
-    />
+       />
       </ListItem>
-
-
     ));
+
         return (
       <div style={{ display: 'flex', height: '100vh' }}>
 
