@@ -26,6 +26,10 @@ const fixedColors = [
   // Add more colors as needed
 ];
 
+function stripSurroundingText(message) {
+    return message.replace(/^[^`]*```html\s*|\s*```[^`]*$/g, '');
+    }
+
 function removeEmptyPairs(obj) {
   // Create a new object to store non-empty pairs
   const filteredObj = {};
@@ -173,7 +177,8 @@ let classificationResult = ''
             );
         console.log(response.data);
         console.log(response.data.choices[0].message.content);
-        const responseData = response.data.choices[0].message.content;
+        const responseData = stripSurroundingText(response.data.choices[0].message.content);
+
         const filteredJson = {}
         onApiResponse(responseData, filteredJson, color);
       } catch (error) {
