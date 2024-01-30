@@ -47,15 +47,16 @@ function removeEmptyPairs(obj) {
   return filteredObj;
 }
 
-export function cleanTextFromDifferencesMark(textHtml, color) {
-    console.log('** Cleaning: last color given', color)
-        // Create a regular expression to match and replace the span tag with its content
-    const regex = new RegExp('<span[^>]*style\\s*=\\s*["\']\\s*[^"\']*background-color:\\s*' + color + '[^"\']*["\'][^>]*>(.*?)<\\/span>', 'gi');
+export function cleanTextFromDifferencesMark(textHtml) {
 
-    // Replace the matched span with its content
-    const clearedHtmlString = textHtml.replace(regex, '$1');
+    fixedColors.forEach(color => {
+        const regex = new RegExp('<span[^>]*style\\s*=\\s*["\']\\s*[^"\']*background-color:\\s*' + color + '[^"\']*["\'][^>]*>(.*?)<\\/span>', 'gi');
 
-    return clearedHtmlString;
+        // Replace the matched span with its content
+        textHtml = textHtml.replace(regex, '$1');
+    });
+
+    return textHtml;
 }
 
 
@@ -94,7 +95,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     // Perform additional actions based on the button click if needed
     // For example, you can display the text in a <p> element.
     console.log(`Clicked on button with text: ${ruleText}`); // THIS IS A RULE WE WILL BE USING
-   editorData = cleanTextFromDifferencesMark(editorData, lastUsedColor);
+   editorData = cleanTextFromDifferencesMark(editorData);
     lastUsedColor = color;
 
   //   try {
