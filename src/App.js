@@ -2,7 +2,7 @@
 import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import React, { Component } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
-import FormDialog, {cleanTextFromDifferencesMark} from "./FormDialog";
+import FormDialog, {cleanTextFromDifferencesMark, fixedColors} from "./FormDialog";
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -39,7 +39,9 @@ class App extends Component {
     handleServerResponse = (responseData, filteredJson, color) => {
         console.log('Server Response in App.js:', responseData);
         console.log('Additional Data in App.js:', filteredJson);
+        this.setUserChangeFlag(false);
         this.updateHistory(this.state.editorData, this.state.filteredJson);
+
         this.setState({ serverResponse: responseData });
         this.setState({ filteredJson: filteredJson });
 
@@ -51,7 +53,27 @@ class App extends Component {
         if (this.editor) {
             this.editor.setData(this.highlightTextDifferences(this.state.editorData, responseData, color));
         }
+        this.setUserChangeFlag(true);
     };
+
+setUserChangeFlag = (value) => {
+  this.isUserChange = value;
+};
+    AAA(textHtml) {
+
+  fixedColors.forEach(color => {
+    const regex = new RegExp(
+      `<span[^>]*style\\s*=\\s*["']\\s*[^"']*background-color:\\s*${color}[^"']*["'][^>]*>(.*?)<\\/span>`,
+      'gi'
+    );
+
+    // Replace the matched span with its content only if it's highlighted
+    textHtml = textHtml.replace(regex, '$1');
+  });
+
+  return textHtml;
+}
+
 
     highlightTextDifferences = (text1, text2, color) => {
   const dmp = new diff();
@@ -194,6 +216,12 @@ class App extends Component {
               }}
               onChange={(event, editor) => {
                 const data = editor.getData();
+                // const cleanedData = this.AAA(data);
+                if (this.isUserChange) {
+                console.log('USER CHANGE')
+                //     const cleanedData = this.AAA(data);
+                // this.setState({ editorData: cleanedData });
+                }
                 this.setState({ editorData: data });
               }}
               editor={DecoupledEditor}

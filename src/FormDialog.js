@@ -15,7 +15,7 @@ import OPENAI_API_KEY from "./config/openai";
 export let lastUsedColor = '';
 let colorIndex = 0;
 const colorMap = {}; // Dictionary to store color assignments
-const fixedColors = [
+export const fixedColors = [
   '#ffad2a',
   '#3cbefc',
   '#77e68a',
