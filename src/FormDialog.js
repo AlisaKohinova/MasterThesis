@@ -76,7 +76,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     handleClose();
   };
 
-  const handleButtonClick = async(ruleText) => {
+  const handleButtonClick = async(ruleText, color) => {
     setSelectedRuleText(ruleText);
     onSetRuleRevertDisabled(false);
     // Perform additional actions based on the button click if needed
@@ -84,6 +84,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     console.log(`Clicked on button with text: ${ruleText}`); // THIS IS A RULE WE WILL BE USING
     const prompt = 'The next is the text we are working on: ' + editorData + '   \nThe rule for modifying the text is: ' + ruleText + '   \n Only return me the modified text without any explanations. Only pure HTML text'
     console.log(prompt);
+    console.log(color);
 
 
   //   try {
@@ -163,7 +164,7 @@ let classificationResult = ''
         console.log(response.data.choices[0].message.content);
         const responseData = response.data.choices[0].message.content;
         const filteredJson = {}
-        onApiResponse(responseData, filteredJson);
+        onApiResponse(responseData, filteredJson, color);
       } catch (error) {
         console.error('Error:', error);
       }
@@ -214,7 +215,7 @@ let classificationResult = ''
         ));
         // filteredJson = removeEmptyPairs(filteredJson)
         console.log(jsonObject)
-        onApiResponse(editorData, filteredJson);
+        onApiResponse(editorData, filteredJson, color);
 
       } catch (error) {
         console.error('Error:', error);
@@ -303,7 +304,7 @@ const getColorForRule = (rule) => {
             borderRadius: '5px', backgroundColor: getColorForRule(rule),
  marginLeft: '4px', marginRight: '4px'}}>
           <Button
-            onClick={() => handleButtonClick(`If ${rule.if_text} then ${rule.then_text}`)}
+            onClick={() => handleButtonClick(`If ${rule.if_text} then ${rule.then_text}`, getColorForRule(rule))}
             style={{borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '1px', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
             title={`If ${rule.if_text} then ${rule.then_text}`} // Set the full text as the title attribute
           >

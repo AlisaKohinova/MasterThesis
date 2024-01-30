@@ -2,7 +2,6 @@
 import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import React, { Component } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
-// import IfElseInput from "./IfElseInput";
 import FormDialog from "./FormDialog";
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
@@ -10,6 +9,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 // import Button from '@mui/material/Button'; // Add this import statement
 import Example from "./Diff";
+import diff from 'diff-match-patch';
 
 class App extends Component {
     editor = null;
@@ -37,7 +37,7 @@ class App extends Component {
     };
 
     // Function to handle the server response
-    handleServerResponse = (responseData, filteredJson) => {
+    handleServerResponse = (responseData, filteredJson, color) => {
         console.log('Server Response in App.js:', responseData);
         console.log('Additional Data in App.js:', filteredJson);
         this.updateHistory(this.state.editorData, this.state.filteredJson);
@@ -49,14 +49,32 @@ class App extends Component {
             this.editor.setData(responseData);
             this.setState({ filteredJson: filteredJson});
         }
+        if (this.editor) {
+            this.editor.setData(this.highlightTextDifferences(this.state.editorData, responseData, color));
+        }
+
+
 
     };
 
-    toggleSidebar = () => {
-    this.setState((prevState) => ({
-      isSidebarOpen: !prevState.isSidebarOpen,
-    }));
-  };
+    highlightTextDifferences = (text1, text2, color) => {
+  const dmp = new diff();
+  const diffs = dmp.diff_main(text1, text2);
+  dmp.diff_cleanupSemantic(diffs);
+
+  return diffs.map((part, index) => {
+
+    if (part[0] === 1) {
+      // Difference found, render with red background
+      return `<span style='background-color: ${color};'>${part[1]}</span>`;
+    } else if (part[0] === 0) {
+      // No difference, render as is
+      return part[1];
+    }
+
+    return '';
+  }).join('');
+};
 
  // Function to handle the button click to change text color to red
   handleRedButton = () => {
