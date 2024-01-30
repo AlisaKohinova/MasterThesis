@@ -259,9 +259,12 @@ const getColorForRule = (rule) => {
 };
 
   return (
-    <div>
-        <div style={{verticalAlign: 'middle'}}>
-      <Button variant="outlined" onClick={handleClickOpen} style={{ paddingTop: '6px', paddingBottom: '6px', marginRight: '5px'}}>
+    <div >
+        <div style={{ width: '75%'}}>
+
+
+        <ButtonGroup aria-label="primary button group" color="primary" variant="filledTonal">
+ <Button variant="outlined" onClick={handleClickOpen} style={{ borderRadius: '5px',paddingTop: '6px', paddingBottom: '6px', marginRight: '5px'}}>
         +
       </Button>
       <Dialog
@@ -306,12 +309,9 @@ const getColorForRule = (rule) => {
         </DialogActions>
       </Dialog>
 
-        <ButtonGroup aria-label=" primary button group" color="primary" variant="filledTonal" style={{ width: '64%' }}>
-
-
       {rules.map((rule, index) => (
 
-        <div key={index} style={{ display: 'flex', alignItems: 'center',
+        <div key={index} style={{  alignItems: 'center',
             borderRadius: '5px', backgroundColor: getColorForRule(rule),
  marginLeft: '4px', marginRight: '4px'}}>
           <Button

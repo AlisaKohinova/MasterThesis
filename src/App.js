@@ -8,7 +8,6 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 // import Button from '@mui/material/Button'; // Add this import statement
-import Example from "./Diff";
 import diff from 'diff-match-patch';
 
 class App extends Component {
@@ -174,7 +173,7 @@ class App extends Component {
           {/*  <Button variant="outlined" onClick={this.handleRedo}>*/}
           {/*  Revert Rule*/}
           {/*</Button>*/}
-          <div className='EditorField' style={{ width: '70%'}}>
+          <div className='EditorField' style={{ width: '75%'}}>
             <CKEditor
                             ref={this.ckeditorRef}
 
@@ -203,10 +202,10 @@ class App extends Component {
             />
 
           </div>
-<div>
-      <h1>Code Differences</h1>
-      <Example />
-    </div>
+{/*<div>*/}
+{/*      <h1>Code Differences</h1>*/}
+{/*      <Example />*/}
+{/*    </div>*/}
         <Drawer anchor="right" variant="permanent" open={isSidebarOpen} sx={{ width: 340, '& .MuiDrawer-paper': { width: '340px !important' } }}>
                 <p className="suggestionsName">Suggestions</p>
           <List>{sidebarContent}</List>
