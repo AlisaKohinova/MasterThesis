@@ -2,7 +2,7 @@
 import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import React, { Component } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
-import FormDialog from "./FormDialog";
+import FormDialog, {cleanTextFromDifferencesMark, lastUsedColor} from "./FormDialog";
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -52,14 +52,11 @@ class App extends Component {
         if (this.editor) {
             this.editor.setData(this.highlightTextDifferences(this.state.editorData, responseData, color));
         }
-
-
-
     };
 
     highlightTextDifferences = (text1, text2, color) => {
   const dmp = new diff();
-  const diffs = dmp.diff_main(text1, text2);
+  const diffs = dmp.diff_main(cleanTextFromDifferencesMark(text1, lastUsedColor), text2);
   dmp.diff_cleanupSemantic(diffs);
 
   return diffs.map((part, index) => {

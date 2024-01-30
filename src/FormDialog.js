@@ -12,6 +12,7 @@ import DeleteIcon from '@mui/icons-material/Clear';
 import axios from "axios";
 import OPENAI_API_KEY from "./config/openai";
 
+export let lastUsedColor = '';
 let colorIndex = 0;
 const colorMap = {}; // Dictionary to store color assignments
 const fixedColors = [
@@ -44,6 +45,17 @@ function removeEmptyPairs(obj) {
   }
 
   return filteredObj;
+}
+
+export function cleanTextFromDifferencesMark(textHtml, color) {
+    console.log('** Cleaning: last color given', color)
+        // Create a regular expression to match and replace the span tag with its content
+    const regex = new RegExp('<span[^>]*style\\s*=\\s*["\']\\s*[^"\']*background-color:\\s*' + color + '[^"\']*["\'][^>]*>(.*?)<\\/span>', 'gi');
+
+    // Replace the matched span with its content
+    const clearedHtmlString = textHtml.replace(regex, '$1');
+
+    return clearedHtmlString;
 }
 
 
@@ -82,10 +94,8 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     // Perform additional actions based on the button click if needed
     // For example, you can display the text in a <p> element.
     console.log(`Clicked on button with text: ${ruleText}`); // THIS IS A RULE WE WILL BE USING
-    const prompt = 'The next is the text we are working on: ' + editorData + '   \nThe rule for modifying the text is: ' + ruleText + '   \n Only return me the modified text without any explanations. Only pure HTML text'
-    console.log(prompt);
-    console.log(color);
-
+   editorData = cleanTextFromDifferencesMark(editorData, lastUsedColor);
+    lastUsedColor = color;
 
   //   try {
   //   const response = await axios.get("https://openlibrary.org/search.json?q=the+lord+of+the+rings");
