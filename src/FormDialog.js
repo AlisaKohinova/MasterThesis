@@ -8,9 +8,10 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import ButtonGroup from '@mui/material/ButtonGroup';
-import DeleteIcon from '@mui/icons-material/Clear';
+// import DeleteIcon from '@mui/icons-material/Clear';
 import axios from "axios";
 import OPENAI_API_KEY from "./config/openai";
+import CloseIcon from '@mui/icons-material/Close';
 
 let colorIndex = 0;
 const colorMap = {}; // Dictionary to store color assignments
@@ -297,17 +298,22 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
 
         <div key={index} style={{  alignItems: 'center',
             borderRadius: '5px', backgroundColor: getColorForRule(rule),
-    marginLeft: '4px', marginRight: '4px'}}>
+    marginLeft: '4px', marginRight: '4px', }}>
           <Button
             onClick={() => handleButtonClick(`If ${rule.if_text} then ${rule.then_text}`, getColorForRule(rule))}
-            style={{borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '1px', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
+            style={{borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '5px', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
             title={`If ${rule.if_text} then ${rule.then_text}`} // Set the full text as the title attribute
           >
             {`If ${rule.if_text.slice(0, 3)}.. then ${rule.then_text.slice(0, 3)}..`}
           </Button>
-          <IconButton onClick={() => handleDeleteRule(index, rule)} color="error" style={{paddingLeft: '3px'}}>
-            <DeleteIcon />
-          </IconButton>
+          {/*<IconButton onClick={() => handleDeleteRule(index, rule)} color="error" style={{paddingLeft: '3px'}}>*/}
+          {/*  x*/}
+          {/*</IconButton>*/}
+
+            <IconButton onClick={() => handleDeleteRule(index, rule)} color="error" style={{ top: "-15px", right: "0",
+            width: "3px", padding: "0px", margin: "0px"}}>
+            <CloseIcon />
+        </IconButton>
 
         </div>
       ))}
