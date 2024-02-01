@@ -1,4 +1,3 @@
-
 import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import React, { Component } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
@@ -7,7 +6,7 @@ import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-// import Button from '@mui/material/Button'; // Add this import statement
+// import Button from '@mui/material/Button';
 import diff from 'diff-match-patch';
 
 class App extends Component {
@@ -16,8 +15,8 @@ class App extends Component {
         super(props);
         this.state = {
             editorData: "<p>Hello from CKEditor 5!</p>",
-            appDisplayText: '', // State to store the concatenated text in App.js
-            serverResponse: '', // State to store response from server
+            appDisplayText: '',
+            serverResponse: '',
             isSidebarOpen: true,
             filteredJson: {},
             history: '<p>Hello from CKEditor 5!</p>',
@@ -26,16 +25,15 @@ class App extends Component {
         };
     }
 
-  ckeditorRef = React.createRef(); // avocado
-  handleSetRuleRevertDisabled = (value) => {
-    this.setState({ ruleRevertDisabled: value });
-  };
-    // Function to update the appDisplayText state
+    ckeditorRef = React.createRef();
+    handleSetRuleRevertDisabled = (value) => {
+        this.setState({ ruleRevertDisabled: value });
+    };
+
     updateAppDisplayText = (displayText) => {
         this.setState({ appDisplayText: displayText });
     };
 
-    // Function to handle the server response
     handleServerResponse = (responseData, filteredJson, color) => {
         console.log('Server Response in App.js:', responseData);
         console.log('Additional Data in App.js:', filteredJson);
@@ -44,7 +42,6 @@ class App extends Component {
 
         this.setState({ serverResponse: responseData });
         this.setState({ filteredJson: filteredJson });
-
 
         if (this.editor) {
             this.editor.setData(responseData);
@@ -56,46 +53,44 @@ class App extends Component {
         this.setUserChangeFlag(true);
     };
 
-setUserChangeFlag = (value) => {
-  this.isUserChange = value;
-};
-    AAA(textHtml) {
+    setUserChangeFlag = (value) => {
+      this.isUserChange = value;
+    };
 
-  fixedColors.forEach(color => {
-    const regex = new RegExp(
-      `<span[^>]*style\\s*=\\s*["']\\s*[^"']*background-color:\\s*${color}[^"']*["'][^>]*>(.*?)<\\/span>`,
-      'gi'
-    );
-
-    // Replace the matched span with its content only if it's highlighted
-    textHtml = textHtml.replace(regex, '$1');
-  });
-
-  return textHtml;
-}
+    overwriteHighlightedAreas(textHtml) {
+      fixedColors.forEach(color => {
+        const regex = new RegExp(
+          `<span[^>]*style\\s*=\\s*["']\\s*[^"']*background-color:\\s*${color}[^"']*["'][^>]*>(.*?)<\\/span>`,
+          'gi'
+        );
+        // Replace the matched span with its content only if it's highlighted
+        textHtml = textHtml.replace(regex, '$1');
+      });
+      return textHtml;
+    }
 
 
     highlightTextDifferences = (text1, text2, color) => {
-  const dmp = new diff();
-  const diffs = dmp.diff_main(cleanTextFromDifferencesMark(text1), text2);
-  dmp.diff_cleanupSemantic(diffs);
+      const dmp = new diff();
+      const diffs = dmp.diff_main(cleanTextFromDifferencesMark(text1), text2);
+      dmp.diff_cleanupSemantic(diffs);
 
-  return diffs.map((part, index) => {
+      return diffs.map((part, index) => {
 
-    if (part[0] === 1) {
-      // Difference found, render with red background
-      return `<span style='background-color: ${color};'>${part[1]}</span>`;
-    } else if (part[0] === 0) {
-      // No difference, render as is
-      return part[1];
-    }
+        if (part[0] === 1) {
+          // Difference found, render with red background
+          return `<span style='background-color: ${color};'>${part[1]}</span>`;
+        } else if (part[0] === 0) {
+          // No difference, render as is
+          return part[1];
+        }
 
-    return '';
-  }).join('');
-};
+        return '';
+      }).join('');
+    };
 
- // Function to handle the button click to change text color to red
-  handleRedButton = () => {
+ // Function to handle the button click to change text color to red - Function for testing
+    handleRedButton = () => {
     if (this.editor) {
       // Get the current editor data
       const currentData = this.editor.getData();
@@ -106,7 +101,7 @@ setUserChangeFlag = (value) => {
       // Set the modified data back to the editor
       this.editor.setData(modifiedData);
     }
-  };
+    };
 
     updateHistory = (responseData, filteredJson) => {
         console.log('History upd')
@@ -125,7 +120,7 @@ setUserChangeFlag = (value) => {
 
         this.setState({ruleRevertDisabled: true})
     };
-        // Inside your class component
+
      handleItemHover = (key, value) => {
         console.log(`Hovered over: ${key}: ${value}`);
         this.setState({ hoveredKey: key });
@@ -153,94 +148,80 @@ setUserChangeFlag = (value) => {
 
 
     render() {
-         const { isSidebarOpen } = this.state;
+        const { isSidebarOpen } = this.state;
 
         const editorConfig = {
             toolbar: [ 'bold', 'italic', 'underline', '|', 'fontColor', 'FontBackgroundColor'],
-
-// comments: {
-//         editorConfig: {
-//             // The list of plugins that will be included in the comments editors.
-//             extraPlugins: [ List,  ]
-//         }
-//     }            // Add or customize toolbar options as needed
         };
 
         const sidebarContent = Object.entries(this.state.filteredJson).map(([key, value], index) => (
-      <ListItem key={index}>
-       <ListItemText
-      primary={`${key}: ${value}`}
-      onMouseOver={() => this.handleItemHover(key, value)}
-      onMouseLeave={this.handleItemLeave}
-      style={{ backgroundColor: this.state.hoveredKey === key ? 'yellow' : 'white' }}
-    />
-      </ListItem>
-
-
-    ));
-        return (
-      <div style={{ display: 'flex', height: '100vh' }}>
-
-        <div style={{ flex: 1, padding: '20px', boxSizing: 'border-box', width: '70%' }}>
-          {/*  <Button variant="outlined" onClick={this.handleRedButton}>*/}
-          {/*  Change Text Color to Red*/}
-          {/*</Button>*/}
-          <FormDialog
-            editorData={this.state.editorData}
-            onApiResponse={this.handleServerResponse}
-              onRedoRule={this.handleRedo} // Pass the handleRedo function as a prop
-            isRuleRevertDisabled={this.state.ruleRevertDisabled}
-            onSetRuleRevertDisabled={this.handleSetRuleRevertDisabled} // Pass the handler function as a prop
-          />
-          {/*  <Button variant="outlined" onClick={this.handleRedo}>*/}
-          {/*  Revert Rule*/}
-          {/*</Button>*/}
-          <div className='EditorField' style={{ width: '75%'}}>
-            <CKEditor
-                            ref={this.ckeditorRef}
-
-              onReady={editor => {
-                const editableElement = editor.ui.getEditableElement();
-                if (editableElement) {
-                  editableElement.parentElement.insertBefore(
-                    editor.ui.view.toolbar.element,
-                    editableElement
-                  );
-                }
-                this.editor = editor;
-              }}
-              onError={(error, { willEditorRestart }) => {
-                if (willEditorRestart) {
-                  this.editor.ui.view.toolbar.element.remove();
-                }
-              }}
-              onChange={(event, editor) => {
-                const data = editor.getData();
-                // const cleanedData = this.AAA(data);
-                if (this.isUserChange) {
-                console.log('USER CHANGE')
-                //     const cleanedData = this.AAA(data);
-                // this.setState({ editorData: cleanedData });
-                }
-                this.setState({ editorData: data });
-              }}
-              editor={DecoupledEditor}
-              data={this.state.editorData}
-              config={editorConfig}
+            <ListItem key={index}>
+            <ListItemText
+            primary={`${key}: ${value}`}
+            onMouseOver={() => this.handleItemHover(key, value)}
+            onMouseLeave={this.handleItemLeave}
+            style={{ backgroundColor: this.state.hoveredKey === key ? 'yellow' : 'white' }}
             />
+            </ListItem>
+    ));
 
-          </div>
-{/*<div>*/}
-{/*      <h1>Code Differences</h1>*/}
-{/*      <Example />*/}
-{/*    </div>*/}
-        <Drawer anchor="right" variant="permanent" open={isSidebarOpen} sx={{ width: 340, '& .MuiDrawer-paper': { width: '340px !important' } }}>
-                <p className="suggestionsName">Suggestions</p>
-          <List>{sidebarContent}</List>
-        </Drawer>
-        </div>
-      </div>
-    );
+        return (
+            <div style={{ display: 'flex', height: '100vh' }}>
+
+                <div style={{ flex: 1, padding: '20px', boxSizing: 'border-box', width: '70%' }}>
+                {/*  <Button variant="outlined" onClick={this.handleRedButton}>*/}
+                {/*  Change Text Color to Red*/}
+                {/*</Button>*/}
+                    <FormDialog
+                    editorData={this.state.editorData}
+                    onApiResponse={this.handleServerResponse}
+                    onRedoRule={this.handleRedo} // Pass the handleRedo function as a prop
+                    isRuleRevertDisabled={this.state.ruleRevertDisabled}
+                    onSetRuleRevertDisabled={this.handleSetRuleRevertDisabled} // Pass the handler function as a prop
+                    />
+                    <div className='EditorField' style={{ width: '75%'}}>
+                        <CKEditor
+                        ref={this.ckeditorRef}
+
+                        onReady={editor => {
+                            const editableElement = editor.ui.getEditableElement();
+                            if (editableElement) {
+                                editableElement.parentElement.insertBefore(
+                                editor.ui.view.toolbar.element,
+                                editableElement
+                                );
+                            }
+                            this.editor = editor;
+                        }}
+
+                        onError={(error, { willEditorRestart }) => {
+                            if (willEditorRestart) {
+                                this.editor.ui.view.toolbar.element.remove();
+                            }
+                        }}
+
+                        onChange={(event, editor) => {
+                            const data = editor.getData();
+                            // const cleanedData = this.overwriteHighlightedAreas(data);
+                            if (this.isUserChange) {
+                            //     const cleanedData = this.overwriteHighlightedAreas(data);
+                            // this.setState({ editorData: cleanedData });
+                            }
+                            this.setState({ editorData: data });
+                        }}
+                        editor={DecoupledEditor}
+                        data={this.state.editorData}
+                        config={editorConfig}
+                        />
+
+                    </div>
+                    <Drawer anchor="right" variant="permanent" open={isSidebarOpen} sx={{ width: 340, '& .MuiDrawer-paper': { width: '340px !important' } }}>
+                        <p className="suggestionsName">Suggestions</p>
+                        <List>{sidebarContent}</List>
+                    </Drawer>
+                </div>
+            </div>
+            );
     }
 
 }

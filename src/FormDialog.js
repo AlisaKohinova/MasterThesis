@@ -12,7 +12,6 @@ import DeleteIcon from '@mui/icons-material/Clear';
 import axios from "axios";
 import OPENAI_API_KEY from "./config/openai";
 
-export let lastUsedColor = '';
 let colorIndex = 0;
 const colorMap = {}; // Dictionary to store color assignments
 export const fixedColors = [
@@ -28,22 +27,18 @@ export const fixedColors = [
 
 function stripSurroundingText(message) {
     return message.replace(/^[^`]*```html\s*|\s*```[^`]*$/g, '');
-    }
+}
 
 function removeEmptyPairs(obj) {
-  // Create a new object to store non-empty pairs
   const filteredObj = {};
 
-  // Iterate over the object's keys
   for (const key in obj) {
     const value = obj[key];
 
-    // Check if the value is not an empty array, empty string, or empty object
     if (
       ((typeof value !== 'object' || Object.keys(value).length > 0) &&
       (value !== '' && (!Array.isArray(value) || (Array.isArray(value) && value.length > 0))))
     ) {
-      // Add the non-empty pair to the filtered object
       filteredObj[key] = value;
     }
   }
@@ -55,8 +50,6 @@ export function cleanTextFromDifferencesMark(textHtml) {
 
     fixedColors.forEach(color => {
         const regex = new RegExp('<span[^>]*style\\s*=\\s*["\']\\s*[^"\']*background-color:\\s*' + color + '[^"\']*["\'][^>]*>(.*?)<\\/span>', 'gi');
-
-        // Replace the matched span with its content
         textHtml = textHtml.replace(regex, '$1');
     });
 
@@ -73,7 +66,6 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     setOpen(true);
   };
   const handleRevertRule = () => {
-    // Use the passed onRedoRule function when the button is clicked
     onRedoRule();
   };
 
@@ -96,12 +88,11 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
   const handleButtonClick = async(ruleText, color) => {
     setSelectedRuleText(ruleText);
     onSetRuleRevertDisabled(false);
-    // Perform additional actions based on the button click if needed
-    // For example, you can display the text in a <p> element.
-    console.log(`Clicked on button with text: ${ruleText}`); // THIS IS A RULE WE WILL BE USING
-   editorData = cleanTextFromDifferencesMark(editorData);
-    lastUsedColor = color;
 
+    console.log(`Clicked on button with text: ${ruleText}`);
+    editorData = cleanTextFromDifferencesMark(editorData);
+
+  // random API for testing
   //   try {
   //   const response = await axios.get("https://openlibrary.org/search.json?q=the+lord+of+the+rings");
   //   const responseData = response.data.docs[0].title;
@@ -109,8 +100,9 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
   // } catch(err) {
   //   console.log("error: ", err);
   // }
-let classificationResult = ''
-   // Classification first
+
+    let classificationResult = ''
+   // Classification of the rule request
       const classification_prompt = 'You need to classify the following rule into 2 classes: Class Changing or Class Suggestions.\n' +
           'If the rule\'s goal is to directly change the text, then it\'s class Changing.\n' +
           'If the rule\'s goal is to suggest something to user, then it\'s class Suggestions.\n' +
@@ -142,7 +134,6 @@ let classificationResult = ''
         console.log(response.data);
         console.log(response.data.choices[0].message.content);
         classificationResult = response.data.choices[0].message.content.toLowerCase();
-        // onApiResponse(responseData);
       } catch (error) {
         console.error('Error:', error);
       }
@@ -178,20 +169,18 @@ let classificationResult = ''
         console.log(response.data);
         console.log(response.data.choices[0].message.content);
         const responseData = stripSurroundingText(response.data.choices[0].message.content);
-
         const filteredJson = {}
         onApiResponse(responseData, filteredJson, color);
       } catch (error) {
         console.error('Error:', error);
       }
-
       }
       else
       {
           console.log('Suggestions task')
           const suggestions_prompt = 'The text: ' + editorData + '\nThe task: ' + ruleText + '\nReturn the dictionary of original text parts mapped to suggestions in JSON format. JSON cannot be nested'
           try {
-        const response = await axios.post(
+          const response = await axios.post(
           'https://api.openai.com/v1/chat/completions',
           {
                 "model": "gpt-3.5-turbo-1106",
@@ -218,18 +207,13 @@ let classificationResult = ''
         const responseData = response.data.choices[0].message.content;
         // Extracting JSON
         const startIndex = responseData.indexOf('{');
-
-        // Find the index of the last curly brace (}) to locate the end of the JSON string
         const endIndex = responseData.lastIndexOf('}');
-
-        // Extract the JSON string
         const jsonString = responseData.slice(startIndex, endIndex + 1);
-
         const jsonObject = JSON.parse(jsonString);
+
         const filteredJson = removeEmptyPairs(Object.fromEntries(
           Object.entries(jsonObject).filter(([key, value]) => key !== value)
         ));
-        // filteredJson = removeEmptyPairs(filteredJson)
         console.log(jsonObject)
         onApiResponse(editorData, filteredJson, color);
 
@@ -237,8 +221,6 @@ let classificationResult = ''
         console.error('Error:', error);
       }
       }
-
-
   };
 
   const handleDeleteRule = (index, rule) => {
@@ -248,30 +230,27 @@ let classificationResult = ''
     delete colorMap[rule.if_text + rule.then_text];
   };
 
-const getColorForRule = (rule) => {
-    // console.log(rule.if_text + rule.then_text)
+  const getColorForRule = (rule) => {
     const rule_id = rule.if_text + rule.then_text
     console.log(colorIndex)
 
-  if (colorMap.hasOwnProperty(rule_id)) {
+    if (colorMap.hasOwnProperty(rule_id)) {
       return colorMap[rule_id];
-  }
-  else {
+    }
+    else {
     colorMap[rule_id] = fixedColors[colorIndex % 7];
       colorIndex += 1;
     return colorMap[rule_id];
-  }
-};
+    }
+  };
 
   return (
-    <div >
+    <div>
         <div style={{ width: '75%'}}>
-
-
         <ButtonGroup aria-label="primary button group" color="primary" variant="filledTonal">
- <Button variant="outlined" onClick={handleClickOpen} style={{ borderRadius: '5px',paddingTop: '6px', paddingBottom: '6px', marginRight: '5px'}}>
-        +
-      </Button>
+        <Button variant="outlined" onClick={handleClickOpen} style={{ borderRadius: '5px',paddingTop: '6px', paddingBottom: '6px', marginRight: '5px'}}>
+            +
+        </Button>
       <Dialog
         open={open}
         onClose={handleClose}
@@ -318,7 +297,7 @@ const getColorForRule = (rule) => {
 
         <div key={index} style={{  alignItems: 'center',
             borderRadius: '5px', backgroundColor: getColorForRule(rule),
- marginLeft: '4px', marginRight: '4px'}}>
+    marginLeft: '4px', marginRight: '4px'}}>
           <Button
             onClick={() => handleButtonClick(`If ${rule.if_text} then ${rule.then_text}`, getColorForRule(rule))}
             style={{borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '1px', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
@@ -332,8 +311,8 @@ const getColorForRule = (rule) => {
 
         </div>
       ))}
-                        </ButtonGroup>
-            </div>
+      </ButtonGroup>
+      </div>
       {selectedRuleText && (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <p style={{ marginRight: '10px' }}>
