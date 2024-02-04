@@ -74,12 +74,49 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     setOpen(false);
   };
 
-  const handleCreateRule = (event) => {
+  const handleCreateRule = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const formJson = Object.fromEntries(formData.entries());
+
+    let newName = formJson.name_text || '';
+
+    if (!newName.trim()) {
+    const naming_rule_prompt = 'I will give you a rule text, you should return ONLY the name of this rule (maximum 24 symbols)\n' +
+        'Here is the rule text: If' + formJson.if_text + ' then ' + formJson.then_text;
+
+    try {
+        const response = await axios.post(
+          'https://api.openai.com/v1/chat/completions',
+          {
+                "model": "gpt-3.5-turbo-1106",
+                "messages": [
+                  {
+                    "role": "system",
+                    "content": "You are a helpful assistant."
+                  },
+                  {
+                    "role": "user",
+                    "content": naming_rule_prompt
+                  }
+                ]
+              },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${OPENAI_API_KEY}`,
+            },
+          }
+        );
+        newName = response.data.choices[0].message.content.replace(/^"|"$/g, '');
+    }
+    catch (error) {
+      console.error('Error fetching random name:', error);
+    }
+    }
+
     const newRule = {
-      name_text: formJson.name_text || '',
+      name_text: newName,
       if_text: formJson.if_text,
       then_text: formJson.then_text,
     };
@@ -315,7 +352,8 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
             style={{borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '1px', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
             title={`If ${rule.if_text} then ${rule.then_text}`} // Set the full text as the title attribute
           >
-            {`${rule.name_text.slice(0, 20) || 'Unnamed Rule'}`}
+            {`${rule.name_text.slice(0, 24)}${rule.name_text.length > 24 ? '..' : ''}` || 'Unnamed Rule'}
+
 
           </Button>
           {/*<IconButton onClick={() => handleDeleteRule(index, rule)} color="error" style={{paddingLeft: '3px'}}>*/}
