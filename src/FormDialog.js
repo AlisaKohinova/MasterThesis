@@ -13,6 +13,7 @@ import axios from "axios";
 import OPENAI_API_KEY from "./config/openai";
 // import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
+import CircularProgress from '@mui/material/CircularProgress';
 
 let colorIndex = 0;
 const colorMap = {}; // Dictionary to store color assignments
@@ -63,6 +64,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
   const [open, setOpen] = useState(false);
   const [rules, setRules] = useState([]);
   const [selectedRuleText, setSelectedRuleText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -223,6 +225,8 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
 
     console.log(`Clicked on button with text: ${ruleText}`);
     editorData = cleanTextFromDifferencesMark(editorData);
+    setIsLoading(true);
+
 
   // random API for testing
   //   try {
@@ -305,6 +309,8 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
         onApiResponse(responseData, filteredJson, color);
       } catch (error) {
         console.error('Error:', error);
+      } finally {
+        setIsLoading(false);
       }
       }
       else
@@ -351,6 +357,8 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
 
       } catch (error) {
         console.error('Error:', error);
+      } finally {
+        setIsLoading(false);
       }
       }
   };
@@ -469,15 +477,19 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
       </ButtonGroup>
       </div>
       {selectedRuleText && (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <p style={{ marginRight: '10px' }}>
-            Selected Rule: <strong>{selectedRuleText}</strong>
-          </p>
-          <Button variant="outlined" onClick={handleRevertRule} disabled={isRuleRevertDisabled}>
-            Revert Rule
-          </Button>
-        </div>
-      )}
+  <div style={{ display: 'flex', alignItems: 'center' }}>
+    <p style={{ marginRight: '10px' }}>
+      Selected Rule: <strong>{selectedRuleText}</strong>
+    </p>
+    {isLoading ? (
+      <CircularProgress size={20} style={{ marginLeft: '10px' }} />
+    ) : (
+      <Button variant="outlined" onClick={handleRevertRule} disabled={isRuleRevertDisabled}>
+        Revert Rule
+      </Button>
+    )}
+  </div>
+)}
 
          {/* Edit Rule Dialog */}
       <Dialog
