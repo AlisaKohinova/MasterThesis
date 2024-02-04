@@ -8,10 +8,11 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import ButtonGroup from '@mui/material/ButtonGroup';
-import DeleteIcon from '@mui/icons-material/Clear';
+// import DeleteIcon from '@mui/icons-material/Clear';
 import axios from "axios";
 import OPENAI_API_KEY from "./config/openai";
 // import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from '@mui/icons-material/Edit';
 
 let colorIndex = 0;
 const colorMap = {}; // Dictionary to store color assignments
@@ -108,7 +109,8 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
             },
           }
         );
-        newName = response.data.choices[0].message.content.replace(/^"|"$/g, '');
+        newName = response.data.choices[0].message.content.replace(/^"|"$/g, '').trim();
+
     }
     catch (error) {
       console.error('Error fetching random name:', error);
@@ -122,6 +124,97 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     };
     setRules([...rules, newRule]);
     handleClose();
+  };
+
+  const [editingRule, setEditingRule] = useState(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
+  const handleOpenEditDialog = (index, rule) => {
+    setEditingRule({ index, ...rule });
+    setEditDialogOpen(true);
+  };
+
+  const handleCloseEditDialog = () => {
+    setEditingRule(null);
+    setEditDialogOpen(false);
+  };
+
+  const handleEditRule = async (event) => {
+      console.log('editing')
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const formJson = Object.fromEntries(formData.entries());
+
+    let newName = formJson.name_text || '';
+
+    if (!newName.trim()) {
+      const naming_rule_prompt =
+        'I will give you a rule text, you should return ONLY the name of this rule (maximum 24 symbols)\n' +
+        'Here is the rule text: If' +
+        formJson.if_text +
+        ' then ' +
+        formJson.then_text;
+
+      try {
+        const response = await axios.post(
+          'https://api.openai.com/v1/chat/completions',
+          {
+            model: 'gpt-3.5-turbo-1106',
+            messages: [
+              {
+                role: 'system',
+                content: 'You are a helpful assistant.',
+              },
+              {
+                role: 'user',
+                content: naming_rule_prompt,
+              },
+            ],
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${OPENAI_API_KEY}`,
+            },
+          }
+        );
+        newName = response.data.choices[0].message.content.replace(/^"|"$/g, '').trim();
+
+      } catch (error) {
+        console.error('Error fetching random name:', error);
+      }
+    }
+
+    if (editingRule) {
+      // Update existing rule
+      const updatedRules = [...rules];
+      updatedRules[editingRule.index] = {
+        name_text: newName,
+        if_text: formJson.if_text,
+        then_text: formJson.then_text,
+      };
+      setRules(updatedRules);
+    } else {
+      // Create new rule
+      const newRule = {
+        name_text: newName,
+        if_text: formJson.if_text,
+        then_text: formJson.then_text,
+      };
+      setRules([...rules, newRule]);
+    }
+
+    handleCloseEditDialog();
+  };
+
+  const handleDeleteRule = () => {
+    if (editingRule && editingRule.index !== undefined) {
+      const updatedRules = [...rules];
+      updatedRules.splice(editingRule.index, 1);
+      setRules(updatedRules);
+      delete colorMap[editingRule.if_text + editingRule.then_text];
+      handleCloseEditDialog();
+    }
   };
 
   const handleButtonClick = async(ruleText, color) => {
@@ -262,12 +355,12 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
       }
   };
 
-  const handleDeleteRule = (index, rule) => {
-    const updatedRules = [...rules];
-    updatedRules.splice(index, 1);
-    setRules(updatedRules);
-    delete colorMap[rule.if_text + rule.then_text];
-  };
+  // const handleDeleteRule = (index, rule) => {
+  //   const updatedRules = [...rules];
+  //   updatedRules.splice(index, 1);
+  //   setRules(updatedRules);
+  //   delete colorMap[rule.if_text + rule.then_text];
+  // };
 
   const getColorForRule = (rule) => {
     const rule_id = rule.if_text + rule.then_text
@@ -349,7 +442,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     marginLeft: '4px', marginRight: '4px', }}>
           <Button
             onClick={() => handleButtonClick(`If ${rule.if_text} then ${rule.then_text}`, getColorForRule(rule))}
-            style={{borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '1px', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
+            style={{borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '8px', marginTop: '2px', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
             title={`If ${rule.if_text} then ${rule.then_text}`} // Set the full text as the title attribute
           >
             {`${rule.name_text.slice(0, 24)}${rule.name_text.length > 24 ? '..' : ''}` || 'Unnamed Rule'}
@@ -364,9 +457,12 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
         {/*    width: "3px", padding: "0px", margin: "0px"}}>*/}
         {/*    <CloseIcon />*/}
         {/*</IconButton>*/}
-            <IconButton onClick={() => handleDeleteRule(index, rule)} color="error" style={{paddingLeft: '3px'}}>
-            <DeleteIcon />
-          </IconButton>
+        {/*    <IconButton onClick={() => handleDeleteRule(index, rule)} color="error" style={{paddingLeft: '3px'}}>*/}
+        {/*    <DeleteIcon />*/}
+        {/*  </IconButton>*/}
+        <IconButton onClick={() => handleOpenEditDialog(index, rule)} color="white" >
+            <EditIcon style={{ color: 'white', fontSize: '16px'  }} />
+        </IconButton>
 
         </div>
       ))}
@@ -382,6 +478,71 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
           </Button>
         </div>
       )}
+
+         {/* Edit Rule Dialog */}
+      <Dialog
+        open={editDialogOpen}
+        onClose={handleCloseEditDialog}
+        PaperProps={{
+          component: 'form',
+          onSubmit: handleEditRule,
+        }}
+      >
+        <DialogTitle>Edit Rule</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            To edit the rule, please modify the following details:
+          </DialogContentText>
+          <p>Name (optional)</p>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name_text"
+            name="name_text"
+            type="text"
+            defaultValue={editingRule ? editingRule.name_text : ''}
+            fullWidth
+            variant="standard"
+          />
+          <p>If</p>
+          <TextField
+            autoFocus
+            required
+            margin="dense"
+            id="if_text"
+            name="if_text"
+            type="text"
+            defaultValue={editingRule ? editingRule.if_text : ''}
+            fullWidth
+            variant="standard"
+          />
+          <p>Then</p>
+          <TextField
+            autoFocus
+            required
+            margin="dense"
+            id="then_text"
+            name="then_text"
+            type="text"
+            defaultValue={editingRule ? editingRule.then_text : ''}
+            fullWidth
+            variant="standard"
+          />
+        </DialogContent>
+        <DialogActions >
+
+          {editingRule && (
+            <Button color="error" onClick={handleDeleteRule}>
+              Delete
+            </Button>
+          )}
+            <Button onClick={handleCloseEditDialog}>Cancel</Button>
+          <Button type="submit">Save Changes</Button>
+
+        </DialogActions>
+      </Dialog>
     </div>
+
+
   );
 }
