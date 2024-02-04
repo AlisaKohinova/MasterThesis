@@ -8,10 +8,10 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import ButtonGroup from '@mui/material/ButtonGroup';
-// import DeleteIcon from '@mui/icons-material/Clear';
+import DeleteIcon from '@mui/icons-material/Clear';
 import axios from "axios";
 import OPENAI_API_KEY from "./config/openai";
-import CloseIcon from '@mui/icons-material/Close';
+// import CloseIcon from '@mui/icons-material/Close';
 
 let colorIndex = 0;
 const colorMap = {}; // Dictionary to store color assignments
@@ -79,6 +79,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     const formData = new FormData(event.currentTarget);
     const formJson = Object.fromEntries(formData.entries());
     const newRule = {
+      name_text: formJson.name_text || '',
       if_text: formJson.if_text,
       then_text: formJson.then_text,
     };
@@ -263,8 +264,18 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
         <DialogTitle>Create new rule</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            To create a new rule, please fill If and Then parts.
+            To create a new rule, please fill the following details:
           </DialogContentText>
+          <p>Name (optional)</p>
+            <TextField
+            autoFocus
+            margin="dense"
+            id="name_text"
+            name="name_text"
+            type="text"
+            fullWidth
+            variant="standard"
+          />
           <p>If</p>
           <TextField
             autoFocus
@@ -301,19 +312,23 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     marginLeft: '4px', marginRight: '4px', }}>
           <Button
             onClick={() => handleButtonClick(`If ${rule.if_text} then ${rule.then_text}`, getColorForRule(rule))}
-            style={{borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '5px', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
+            style={{borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '1px', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
             title={`If ${rule.if_text} then ${rule.then_text}`} // Set the full text as the title attribute
           >
-            {`If ${rule.if_text.slice(0, 3)}.. then ${rule.then_text.slice(0, 3)}..`}
+            {`${rule.name_text.slice(0, 20) || 'Unnamed Rule'}`}
+
           </Button>
           {/*<IconButton onClick={() => handleDeleteRule(index, rule)} color="error" style={{paddingLeft: '3px'}}>*/}
           {/*  x*/}
           {/*</IconButton>*/}
 
-            <IconButton onClick={() => handleDeleteRule(index, rule)} color="error" style={{ top: "-15px", right: "0",
-            width: "3px", padding: "0px", margin: "0px"}}>
-            <CloseIcon />
-        </IconButton>
+        {/*    <IconButton onClick={() => handleDeleteRule(index, rule)} color="error" style={{ top: "-15px", right: "0",*/}
+        {/*    width: "3px", padding: "0px", margin: "0px"}}>*/}
+        {/*    <CloseIcon />*/}
+        {/*</IconButton>*/}
+            <IconButton onClick={() => handleDeleteRule(index, rule)} color="error" style={{paddingLeft: '3px'}}>
+            <DeleteIcon />
+          </IconButton>
 
         </div>
       ))}
