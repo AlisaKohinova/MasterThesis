@@ -24,7 +24,9 @@ class App extends Component {
             history: '<p>Hello from CKEditor 5!</p>',
             historyJson : {},
             ruleRevertDisabled: false,
-            replacedKeys: {},
+            replacedKeys: [],
+            listItemClicked: null, // New state variable to track the clicked ListItem
+
         };
     }
 
@@ -155,11 +157,10 @@ class App extends Component {
             const modifiedData = currentData.replace(new RegExp(`${key}`, 'g'), value);
 
             // Update replacedKeys state to mark the key as replaced
+            // Update replacedKeys state to include the clicked key
             this.setState((prevState) => ({
-                replacedKeys: {
-                    ...prevState.replacedKeys,
-                    [key]: true,
-                },
+                replacedKeys: [...prevState.replacedKeys, key],
+                listItemClicked: key, // Set the clicked ListItem
             }));
 
             this.editor.setData(modifiedData);
@@ -225,7 +226,10 @@ class App extends Component {
             );
           } else {
             return (
-               <ListItem key={index} style={{ position: 'relative' }} onMouseOver={() => this.handleItemHover(key, value)}
+               <ListItem key={index}
+                         style={{ position: 'relative',
+                         }}
+                         onMouseOver={() => this.handleItemHover(key, value)}
                             onMouseLeave={this.handleItemLeave}>
                         <ListItemText
                             primary={`${key}: ${value}`}
@@ -234,7 +238,12 @@ class App extends Component {
                                 paddingTop: '8px',
                                 paddingBottom: '8px',
                                 paddingRight: '8px',
-                                paddingLeft: '8px'
+                                paddingLeft: '8px',
+                                  ...(this.state.replacedKeys.includes(key)
+                                ? {
+                                      backgroundColor: '#d2ebff', // Change to lightblue for clicked items
+                                  }
+                                : {}),
                             }}
                         />
                         {this.state.hoveredKey === key && (
