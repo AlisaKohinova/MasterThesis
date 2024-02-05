@@ -216,7 +216,6 @@ class App extends Component {
 
                     </div>
                     <Drawer anchor="right" variant="permanent" open={isSidebarOpen} sx={{ width: 340, '& .MuiDrawer-paper': { width: '340px !important' } }}>
-                        <p className="suggestionsName">Suggestions</p>
                         <List>{sidebarContent}</List>
                     </Drawer>
                 </div>

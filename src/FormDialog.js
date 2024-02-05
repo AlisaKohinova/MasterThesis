@@ -239,9 +239,10 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
 
     let classificationResult = ''
    // Classification of the rule request
-      const classification_prompt = 'You need to classify the following rule into 2 classes: Class Changing or Class Suggestions.\n' +
+      const classification_prompt = 'You need to classify the following rule into 3 classes: Class Changing, Class Suggestions or Class Feedback.\n' +
           'If the rule\'s goal is to directly change the text, then it\'s class Changing.\n' +
           'If the rule\'s goal is to suggest something to user, then it\'s class Suggestions.\n' +
+          'If the rule\'s goal is to return feedback, opinion to user or instructions for text improvement, then it\'s class Feedback.\n' +
           'You must only return the name of the selected Class.\n' +
           '\nHere is the rule:' + ruleText
     try {
@@ -313,7 +314,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
         setIsLoading(false);
       }
       }
-      else
+      else if (classificationResult.includes('suggestions'))
       {
           console.log('Suggestions task')
           const suggestions_prompt = 'The text: ' + editorData + '\nThe task: ' + ruleText + '\nReturn the dictionary of original text parts mapped to suggestions in JSON format. JSON cannot be nested'
@@ -353,6 +354,43 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
           Object.entries(jsonObject).filter(([key, value]) => key !== value)
         ));
         console.log(jsonObject)
+        onApiResponse(editorData, filteredJson, color);
+
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+      }
+      else {
+        console.log('Feedback task')
+          const feedback_prompt = 'The text: ' + editorData + '\nThe task: ' + ruleText
+          try {
+          const response = await axios.post(
+          'https://api.openai.com/v1/chat/completions',
+          {
+                "model": "gpt-3.5-turbo-1106",
+                "messages": [
+                  {
+                    "role": "system",
+                    "content": "You are a helpful assistant."
+                  },
+                  {
+                    "role": "user",
+                    "content": feedback_prompt
+                  }
+                ]
+              },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${OPENAI_API_KEY}`,
+            },
+          }
+            );
+        console.log(response.data);
+        console.log(response.data.choices[0].message.content);
+        const filteredJson = {'Feedback': response.data.choices[0].message.content}
         onApiResponse(editorData, filteredJson, color);
 
       } catch (error) {
