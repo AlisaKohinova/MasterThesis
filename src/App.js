@@ -154,16 +154,26 @@ class App extends Component {
             toolbar: [ 'bold', 'italic', 'underline', '|', 'fontColor', 'FontBackgroundColor'],
         };
 
-        const sidebarContent = Object.entries(this.state.filteredJson).map(([key, value], index) => (
-            <ListItem key={index}>
-            <ListItemText
-            primary={`${key}: ${value}`}
-            onMouseOver={() => this.handleItemHover(key, value)}
-            onMouseLeave={this.handleItemLeave}
-            style={{ backgroundColor: this.state.hoveredKey === key ? 'yellow' : 'white' }}
-            />
-            </ListItem>
-    ));
+        const sidebarContent = Object.entries(this.state.filteredJson).map(([key, value], index) => {
+          if (key === 'Feedback') {
+            return (
+              <ListItem key={index}>
+                <ListItemText primary={value} />
+              </ListItem>
+            );
+          } else {
+            return (
+              <ListItem key={index}>
+                <ListItemText
+                  primary={`${key}: ${value}`}
+                  onMouseOver={() => this.handleItemHover(key, value)}
+                  onMouseLeave={this.handleItemLeave}
+                  style={{ backgroundColor: this.state.hoveredKey === key ? 'yellow' : 'white' }}
+                />
+              </ListItem>
+            );
+          }
+        });
 
         return (
             <div style={{ display: 'flex', height: '100vh' }}>
@@ -216,7 +226,7 @@ class App extends Component {
 
                     </div>
                     <Drawer anchor="right" variant="permanent" open={isSidebarOpen} sx={{ width: 340, '& .MuiDrawer-paper': { width: '340px !important' } }}>
-                        <List>{sidebarContent}</List>
+                        <List style={{paddingTop: '15px'}}>{sidebarContent}</List>
                     </Drawer>
                 </div>
             </div>
