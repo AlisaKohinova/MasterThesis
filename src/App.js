@@ -8,6 +8,8 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 // import Button from '@mui/material/Button';
 import diff from 'diff-match-patch';
+import axios from "axios";
+import OPENAI_API_KEY from "./config/openai";
 
 class App extends Component {
     editor = null;
@@ -124,7 +126,6 @@ class App extends Component {
      handleItemHover = (key, value) => {
         console.log(`Hovered over: ${key}: ${value}`);
         this.setState({ hoveredKey: key });
-        this.setState({ hoveredKey: key, hoveredValue: value });
 
         // Get the CKEditor instance
         const editor = this.ckeditorRef.current.editor;
@@ -137,7 +138,6 @@ class App extends Component {
 
     handleItemLeave = () => {
       this.setState({ hoveredKey: null });
-        this.setState({ hoveredKey: null, hoveredValue: null });
 
       // Get the CKEditor instance
       const editor = this.ckeditorRef.current.editor;
@@ -154,6 +154,47 @@ class App extends Component {
             const modifiedData = currentData.replace(new RegExp(`${key}`, 'g'), value);
             this.editor.setData(modifiedData);
         }
+    };
+
+    handleRegenerateKey = async (key, value) => {
+        const regeneration_prompt = 'You need to return a synonymic word or phrase. Only return a synonymic word or phrase itself, without ANY additional words.\n' +
+            'DO NOT return ' + value +
+            '\nWord or phrase: ' + key
+        try {
+            const response = await axios.post(
+              'https://api.openai.com/v1/chat/completions',
+              {
+                    "model": "gpt-3.5-turbo-1106",
+                    "messages": [
+                      {
+                        "role": "system",
+                        "content": "You are a helpful assistant."
+                      },
+                      {
+                        "role": "user",
+                        "content": regeneration_prompt
+                      }
+                    ]
+                  },
+              {
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                },
+              }
+                );
+            console.log(response.data);
+            console.log(response.data.choices[0].message.content);
+            const regeneration_result = response.data.choices[0].message.content;
+            console.log('key: ', key, 'reg res:', regeneration_result, 'but not synonymic', value)
+            this.setState(prevState => ({
+            filteredJson: {
+                ...prevState.filteredJson,
+                [key]: regeneration_result,
+            },
+            })); } catch (error) {
+            console.error('Error:', error);
+          }
     };
 
 
@@ -178,15 +219,27 @@ class App extends Component {
                             onMouseLeave={this.handleItemLeave}>
                         <ListItemText
                             primary={`${key}: ${value}`}
-
                             style={{
                                 backgroundColor: this.state.hoveredKey === key ? '#F1F1F1' : 'white',
                                 paddingTop: '8px',
                                 paddingBottom: '8px',
-                                paddingRight: '5px',
-                                paddingLeft: '5px'
+                                paddingRight: '8px',
+                                paddingLeft: '8px'
                             }}
                         />
+                        {this.state.hoveredKey === key && (
+                            <button
+                                onClick={() => this.handleRegenerateKey(key, value)}
+                                style={{
+                                    position: 'absolute',
+                                    bottom: '5px',
+                                    right: '96px', // Adjust this value based on your preference
+                                    zIndex: '1',
+                                }}
+                            >
+                                Regenerate
+                            </button>
+                        )}
                         {this.state.hoveredKey === key && (
                             <button
                                 onClick={() => this.handleReplaceKey(key, value)}
