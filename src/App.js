@@ -124,6 +124,7 @@ class App extends Component {
      handleItemHover = (key, value) => {
         console.log(`Hovered over: ${key}: ${value}`);
         this.setState({ hoveredKey: key });
+        this.setState({ hoveredKey: key, hoveredValue: value });
 
         // Get the CKEditor instance
         const editor = this.ckeditorRef.current.editor;
@@ -136,6 +137,7 @@ class App extends Component {
 
     handleItemLeave = () => {
       this.setState({ hoveredKey: null });
+        this.setState({ hoveredKey: null, hoveredValue: null });
 
       // Get the CKEditor instance
       const editor = this.ckeditorRef.current.editor;
@@ -145,6 +147,15 @@ class App extends Component {
       const modifiedData = currentData.replace(/<strong>/g, '').replace(/<\/strong>/g, '');
       editor.setData(modifiedData);
     };
+
+    handleReplaceKey = (key, value) => {
+        if (this.editor && key && value) {
+            const currentData = this.editor.getData();
+            const modifiedData = currentData.replace(new RegExp(`${key}`, 'g'), value);
+            this.editor.setData(modifiedData);
+        }
+    };
+
 
 
     render() {
@@ -163,14 +174,33 @@ class App extends Component {
             );
           } else {
             return (
-              <ListItem key={index}>
-                <ListItemText
-                  primary={`${key}: ${value}`}
-                  onMouseOver={() => this.handleItemHover(key, value)}
-                  onMouseLeave={this.handleItemLeave}
-                  style={{ backgroundColor: this.state.hoveredKey === key ? 'yellow' : 'white' }}
-                />
-              </ListItem>
+               <ListItem key={index} style={{ position: 'relative' }} onMouseOver={() => this.handleItemHover(key, value)}
+                            onMouseLeave={this.handleItemLeave}>
+                        <ListItemText
+                            primary={`${key}: ${value}`}
+
+                            style={{
+                                backgroundColor: this.state.hoveredKey === key ? '#F1F1F1' : 'white',
+                                paddingTop: '8px',
+                                paddingBottom: '8px',
+                                paddingRight: '5px',
+                                paddingLeft: '5px'
+                            }}
+                        />
+                        {this.state.hoveredKey === key && (
+                            <button
+                                onClick={() => this.handleReplaceKey(key, value)}
+                                style={{
+                                    position: 'absolute',
+                                    bottom: '5px',
+                                    right: '5px',
+                                    zIndex: '1',
+                                }}
+                            >
+                                Replace Text
+                            </button>
+                        )}
+                    </ListItem>
             );
           }
         });
