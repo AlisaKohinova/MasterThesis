@@ -24,6 +24,7 @@ class App extends Component {
             history: '<p>Hello from CKEditor 5!</p>',
             historyJson : {},
             ruleRevertDisabled: false,
+            replacedKeys: {},
         };
     }
 
@@ -152,6 +153,15 @@ class App extends Component {
         if (this.editor && key && value) {
             const currentData = this.editor.getData();
             const modifiedData = currentData.replace(new RegExp(`${key}`, 'g'), value);
+
+            // Update replacedKeys state to mark the key as replaced
+            this.setState((prevState) => ({
+                replacedKeys: {
+                    ...prevState.replacedKeys,
+                    [key]: true,
+                },
+            }));
+
             this.editor.setData(modifiedData);
         }
     };
@@ -240,18 +250,34 @@ class App extends Component {
                                 Regenerate
                             </button>
                         )}
-                        {this.state.hoveredKey === key && (
-                            <button
-                                onClick={() => this.handleReplaceKey(key, value)}
-                                style={{
-                                    position: 'absolute',
-                                    bottom: '5px',
-                                    right: '5px',
-                                    zIndex: '1',
-                                }}
-                            >
-                                Replace Text
-                            </button>
+                        {this.state.hoveredKey === key && !this.state.replacedKeys[key] && (
+                        <button
+                            onClick={() => this.handleReplaceKey(key, value)}
+                            style={{
+                                position: 'absolute',
+                                bottom: '5px',
+                                right: '5px',
+                                zIndex: '1',
+                            }}
+                        >
+                            Replace Text
+                        </button>
+                    )}
+                    {this.state.hoveredKey === key && this.state.replacedKeys[key] && (
+                        <button
+                            disabled
+                            style={{
+                                position: 'absolute',
+                                bottom: '5px',
+                                right: '5px',
+                                paddingRight: '12px',
+                                paddingLeft: '12px',
+                                backgroundColor: 'light green', // Set the background color to green after pressing
+                                zIndex: '1',
+                            }}
+                        >
+                            Replaced
+                        </button>
                         )}
                     </ListItem>
             );
