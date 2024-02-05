@@ -154,8 +154,12 @@ class App extends Component {
     handleReplaceKey = (key, value) => {
         if (this.editor && key && value) {
             const currentData = this.editor.getData();
-            const modifiedData = currentData.replace(new RegExp(`${key}`, 'g'), value);
 
+            const regex = new RegExp(`${key}`, 'g');
+            const highlightedData = currentData.replace(
+                regex,
+                `<span style="background-color: #d2ebff; font-weight: normal;">${value}</span>`
+            );
             // Update replacedKeys state to mark the key as replaced
             // Update replacedKeys state to include the clicked key
             this.setState((prevState) => ({
@@ -163,7 +167,7 @@ class App extends Component {
                 listItemClicked: key, // Set the clicked ListItem
             }));
 
-            this.editor.setData(modifiedData);
+            this.editor.setData(highlightedData);
         }
     };
 

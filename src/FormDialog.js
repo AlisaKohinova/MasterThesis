@@ -28,6 +28,17 @@ export const fixedColors = [
   // Add more colors as needed
 ];
 
+export const colorsToClean = [
+    '#d2ebff',
+    '#ffad2a',
+    '#3cbefc',
+    '#77e68a',
+    '#9d64e2',
+    '#fb83b3',
+    '#c3effc',
+    '#FF9999',
+]
+
 function stripSurroundingText(message) {
     return message.replace(/^[^`]*```html\s*|\s*```[^`]*$/g, '');
 }
@@ -51,7 +62,7 @@ function removeEmptyPairs(obj) {
 
 export function cleanTextFromDifferencesMark(textHtml) {
 
-    fixedColors.forEach(color => {
+    colorsToClean.forEach(color => {
         const regex = new RegExp('<span[^>]*style\\s*=\\s*["\']\\s*[^"\']*background-color:\\s*' + color + '[^"\']*["\'][^>]*>(.*?)<\\/span>', 'gi');
         textHtml = textHtml.replace(regex, '$1');
     });
