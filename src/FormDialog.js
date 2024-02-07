@@ -235,7 +235,9 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     onSetRuleRevertDisabled(false);
 
     console.log(`Clicked on button with text: ${ruleText}`);
+    console.log('000000', editorData)
     editorData = cleanTextFromDifferencesMark(editorData);
+
     setIsLoading(true);
 
 

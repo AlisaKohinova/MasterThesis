@@ -6,12 +6,13 @@ import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-// import Button from '@mui/material/Button';
+import Button from '@mui/material/Button';
 import diff from 'diff-match-patch';
 import axios from "axios";
 import OPENAI_API_KEY from "./config/openai";
 
 class App extends Component {
+
     editor = null;
     constructor(props) {
         super(props);
@@ -26,7 +27,7 @@ class App extends Component {
             ruleRevertDisabled: false,
             replacedKeys: [],
             listItemClicked: null, // New state variable to track the clicked ListItem
-
+            previousSelection: null,
         };
     }
 
@@ -57,6 +58,50 @@ class App extends Component {
         }
         this.setUserChangeFlag(true);
     };
+
+    componentDidMount() {
+        // Add event listener when the component mounts
+        document.addEventListener('mouseup', this.handleTextSelection);
+    }
+
+    componentWillUnmount() {
+        // Remove event listener when the component unmounts
+        document.removeEventListener('mouseup', this.handleTextSelection);
+    }
+
+    handleTextSelection = () => {
+        const currentSelection = this.getSelectionText();
+        const previousSelection = this.state.previousSelection;
+
+        if (currentSelection && !previousSelection) {
+            // Text is newly selected
+            console.log('Text selected:', currentSelection);
+            // Perform any action you want with the selected text here
+        } else if (!currentSelection && previousSelection) {
+            // Text is deselected
+            console.log('Text deselected');
+            // Perform any action you want for deselection
+        }
+        console.log(currentSelection)
+        // Update the previous selection for the next comparison
+        this.setState({ previousSelection: currentSelection });
+    };
+
+  getSelectionText() {
+      // console.log('I WAS CALLED!')
+    let selected_text = "";
+    if (window.getSelection) {
+        selected_text = window.getSelection().toString();
+    } else if (document.selection && document.selection.type !== "Control") {
+        selected_text = document.selection.createRange().text;
+    }
+      if (!selected_text) {
+          // console.log('PLAN A', this.state.editorData)
+          return this.state.editorData;
+      }
+      // console.log('PLAN b', selected_text)
+    return selected_text;
+    }
 
     setUserChangeFlag = (value) => {
       this.isUserChange = value;
@@ -96,16 +141,7 @@ class App extends Component {
 
  // Function to handle the button click to change text color to red - Function for testing
     handleRedButton = () => {
-    if (this.editor) {
-      // Get the current editor data
-      const currentData = this.editor.getData();
-
-      // Modify the editor data to change text color to red
-      const modifiedData = `<span style="color: red;">${currentData}</span>`;
-
-      // Set the modified data back to the editor
-      this.editor.setData(modifiedData);
-    }
+    this.getSelectionText()
     };
 
     updateHistory = (responseData, filteredJson) => {
@@ -301,15 +337,15 @@ class App extends Component {
             <div style={{ display: 'flex', height: '100vh' }}>
 
                 <div style={{ flex: 1, padding: '20px', boxSizing: 'border-box', width: '70%' }}>
-                {/*  <Button variant="outlined" onClick={this.handleRedButton}>*/}
-                {/*  Change Text Color to Red*/}
-                {/*</Button>*/}
+                  <Button variant="outlined" onClick={this.handleRedButton}>
+                  Change Text Color to Red
+                </Button>
                     <FormDialog
-                    editorData={this.state.editorData}
+                    editorData={this.state.previousSelection} //TODO here implement the selection of the text
                     onApiResponse={this.handleServerResponse}
-                    onRedoRule={this.handleRedo} // Pass the handleRedo function as a prop
+                    onRedoRule={this.handleRedo}
                     isRuleRevertDisabled={this.state.ruleRevertDisabled}
-                    onSetRuleRevertDisabled={this.handleSetRuleRevertDisabled} // Pass the handler function as a prop
+                    onSetRuleRevertDisabled={this.handleSetRuleRevertDisabled}
                     />
                     <div className='EditorField' style={{ width: '75%'}}>
                         <CKEditor
