@@ -72,11 +72,10 @@ class App extends Component {
             leftPart = string.substring(0, index);
             rightPart = string.substring(index + substring.length);
         }
-
         console.log('Left part', leftPart)
         console.log('Right part', rightPart)
-       this.setState({ leftPartSelection: leftPart });
-       this.setState({ rightPartSelection: rightPart });
+       this.setState({ leftPartSelection: cleanTextFromDifferencesMark(leftPart) });
+       this.setState({ rightPartSelection: cleanTextFromDifferencesMark(rightPart) });
     }
 
     // Function to handle the button click to change text color to red - Function for testing
@@ -111,7 +110,6 @@ class App extends Component {
         // Update the previous selection for the next comparison
         this.setState({ previousSelection: currentSelection });
         this.SplitAroundSubstring(this.state.editorData, currentSelection)
-
 
     };
 
