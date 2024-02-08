@@ -28,6 +28,8 @@ class App extends Component {
             replacedKeys: [],
             listItemClicked: null, // New state variable to track the clicked ListItem
             previousSelection: null,
+            leftPartSelection: '',
+            rightPartSelection: '',
         };
     }
 
@@ -43,7 +45,9 @@ class App extends Component {
     handleServerResponse = (responseData, filteredJson, color) => {
         console.log('Server Response in App.js:', responseData);
         console.log('Additional Data in App.js:', filteredJson);
+        // console.log('left part and right', this.state.leftPartSelection, this.state.rightPartSelection)
         this.setUserChangeFlag(false);
+        responseData = this.state.leftPartSelection + responseData + this.state.rightPartSelection
         this.updateHistory(this.state.editorData, this.state.filteredJson);
 
         this.setState({ serverResponse: responseData });
@@ -59,6 +63,28 @@ class App extends Component {
         this.setUserChangeFlag(true);
     };
 
+   SplitAroundSubstring(string, substring) {
+        const index = string.indexOf(substring);
+        let leftPart = "";
+        let rightPart = "";
+
+        if (index !== -1) {
+            leftPart = string.substring(0, index);
+            rightPart = string.substring(index + substring.length);
+        }
+
+        console.log('Left part', leftPart)
+        console.log('Right part', rightPart)
+       this.setState({ leftPartSelection: leftPart });
+       this.setState({ rightPartSelection: rightPart });
+    }
+
+    // Function to handle the button click to change text color to red - Function for testing
+    handleRedButton = () => {
+        console.log(this.getSelectionText())
+        this.SplitAroundSubstring(this.state.editorData, this.getSelectionText())
+    };
+
     componentDidMount() {
         // Add event listener when the component mounts
         document.addEventListener('mouseup', this.handleTextSelection);
@@ -72,7 +98,6 @@ class App extends Component {
     handleTextSelection = () => {
         const currentSelection = this.getSelectionText();
         const previousSelection = this.state.previousSelection;
-
         if (currentSelection && !previousSelection) {
             // Text is newly selected
             console.log('Text selected:', currentSelection);
@@ -85,6 +110,9 @@ class App extends Component {
         console.log(currentSelection)
         // Update the previous selection for the next comparison
         this.setState({ previousSelection: currentSelection });
+        this.SplitAroundSubstring(this.state.editorData, currentSelection)
+
+
     };
 
   getSelectionText() {
@@ -137,11 +165,6 @@ class App extends Component {
 
         return '';
       }).join('');
-    };
-
- // Function to handle the button click to change text color to red - Function for testing
-    handleRedButton = () => {
-    this.getSelectionText()
     };
 
     updateHistory = (responseData, filteredJson) => {
