@@ -14,6 +14,7 @@ import OPENAI_API_KEY from "./config/openai";
 // import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
 import CircularProgress from '@mui/material/CircularProgress';
+import MenuItem from '@mui/material/MenuItem'; // Import MenuItem for dropdown
 
 let colorIndex = 0;
 const colorMap = {}; // Dictionary to store color assignments
@@ -76,6 +77,8 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
   const [rules, setRules] = useState([]);
   const [selectedRuleText, setSelectedRuleText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedColor, setSelectedColor] = useState('#ffad2a'); // State for selected color
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -94,6 +97,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     const formJson = Object.fromEntries(formData.entries());
 
     let newName = formJson.name_text || '';
+    const selectedColor = formJson.color; // Retrieve selected color
 
     if (!newName.trim()) {
     const naming_rule_prompt = 'I will give you a rule text, you should return ONLY the short name of this rule (maximum 16 symbols)\n' +
@@ -134,6 +138,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
       name_text: newName,
       if_text: formJson.if_text,
       then_text: formJson.then_text,
+      color: selectedColor // Add selected color to the new rule
     };
     setRules([...rules, newRule]);
     handleClose();
@@ -422,16 +427,18 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
   // };
 
   const getColorForRule = (rule) => {
-    const rule_id = rule.if_text + rule.then_text
-    console.log(colorIndex)
+    if (rule.color) {
+    return rule.color; // If a color is explicitly assigned to the rule, use it
+    } else {
+    const rule_id = rule.if_text + rule.then_text;
 
     if (colorMap.hasOwnProperty(rule_id)) {
       return colorMap[rule_id];
-    }
-    else {
-    colorMap[rule_id] = fixedColors[colorIndex % 7];
+    } else {
+      colorMap[rule_id] = fixedColors[colorIndex % 7];
       colorIndex += 1;
-    return colorMap[rule_id];
+      return colorMap[rule_id];
+    }
     }
   };
 
@@ -465,7 +472,23 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
             fullWidth
             variant="standard"
           />
-          <p>If</p>
+              <p>Select Color</p>
+              <TextField
+                select
+                id="color"
+                name="color"
+                value={selectedColor}
+                onChange={(e) => setSelectedColor(e.target.value)}
+                fullWidth
+                variant="standard"
+              >
+                {fixedColors.map((color) => (
+                  <MenuItem key={color} value={color}>
+                    <div style={{ width: '20px', height: '20px', backgroundColor: color, marginRight: '5px' }}></div>
+                  </MenuItem>
+                ))}
+              </TextField>
+            <p>If</p>
           <TextField
             autoFocus
             required
