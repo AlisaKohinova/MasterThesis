@@ -45,7 +45,9 @@ class App extends Component {
     handleServerResponse = (responseData, filteredJson, color) => {
         console.log('Server Response in App.js:', responseData);
         console.log('Additional Data in App.js:', filteredJson);
-        // console.log('left part and right', this.state.leftPartSelection, this.state.rightPartSelection)
+        if (filteredJson.hasOwnProperty('<p>')) {
+            delete filteredJson['<p>'];
+        }
         this.setUserChangeFlag(false);
         responseData = this.state.leftPartSelection + responseData + this.state.rightPartSelection
         this.updateHistory(this.state.editorData, this.state.filteredJson);
@@ -74,6 +76,7 @@ class App extends Component {
         }
         console.log('Left part', leftPart)
         console.log('Right part', rightPart)
+       console.log(substring)
        this.setState({ leftPartSelection: cleanTextFromDifferencesMark(leftPart) });
        this.setState({ rightPartSelection: cleanTextFromDifferencesMark(rightPart) });
     }
