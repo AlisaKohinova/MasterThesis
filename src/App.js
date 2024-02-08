@@ -10,6 +10,9 @@ import ListItemText from '@mui/material/ListItemText';
 import diff from 'diff-match-patch';
 import axios from "axios";
 import OPENAI_API_KEY from "./config/openai";
+import RefreshIcon from '@mui/icons-material/Refresh';
+import IconButton from '@mui/material/IconButton';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 
 class App extends Component {
 
@@ -272,6 +275,15 @@ class App extends Component {
           }
     };
 
+    copyToClipboard = (value) => {
+        navigator.clipboard.writeText(value)
+            .then(() => {
+                console.log('Text copied to clipboard:', value);
+            })
+            .catch((error) => {
+                console.error('Error copying text to clipboard:', error);
+            });
+    }
 
 
     render() {
@@ -311,17 +323,35 @@ class App extends Component {
                             }}
                         />
                         {this.state.hoveredKey === key && (
-                            <button
+                            <IconButton
+                                onClick={() => this.copyToClipboard(value)}
+                                style={{
+                                    position: 'absolute',
+                                    bottom: '-7px',
+                                    right: '127px',
+                                    zIndex: '1',
+                                    backgroundColor: 'transparent',
+                                    width: '4px',
+                                    transform: 'scale(0.77)'
+                                }}
+                            >
+                                <FileCopyIcon />
+                            </IconButton>
+                        )}
+                        {this.state.hoveredKey === key && (
+                            <IconButton
                                 onClick={() => this.handleRegenerateKey(key, value)}
                                 style={{
                                     position: 'absolute',
-                                    bottom: '5px',
-                                    right: '96px', // Adjust this value based on your preference
+                                    bottom: '-7px',
+                                    right: '100px',
                                     zIndex: '1',
+                                    backgroundColor: 'transparent',
+                                    width: '5px'
                                 }}
                             >
-                                Regenerate
-                            </button>
+                                <RefreshIcon />
+                            </IconButton>
                         )}
                         {this.state.hoveredKey === key && !this.state.replacedKeys[key] && (
                         <button
@@ -345,7 +375,7 @@ class App extends Component {
                                 right: '5px',
                                 paddingRight: '12px',
                                 paddingLeft: '12px',
-                                backgroundColor: 'light green', // Set the background color to green after pressing
+                                backgroundColor: 'light green',
                                 zIndex: '1',
                             }}
                         >
