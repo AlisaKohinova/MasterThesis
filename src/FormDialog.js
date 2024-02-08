@@ -96,7 +96,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     let newName = formJson.name_text || '';
 
     if (!newName.trim()) {
-    const naming_rule_prompt = 'I will give you a rule text, you should return ONLY the name of this rule (maximum 24 symbols)\n' +
+    const naming_rule_prompt = 'I will give you a rule text, you should return ONLY the short name of this rule (maximum 16 symbols)\n' +
         'Here is the rule text: If' + formJson.if_text + ' then ' + formJson.then_text;
 
     try {
@@ -437,7 +437,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
 
   return (
     <div>
-        <div style={{ width: '75%'}}>
+        <div style={{ width: '74%', border: "1px solid lightgrey", borderRadius: '5px', padding: '10px', paddingRight: '5px'}}>
         <ButtonGroup aria-label="primary button group" color="primary" variant="filledTonal">
         <Button variant="outlined" onClick={handleClickOpen} style={{ borderRadius: '5px',paddingTop: '6px', paddingBottom: '6px', marginRight: '5px'}}>
             +
@@ -528,7 +528,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
       </ButtonGroup>
       </div>
       {selectedRuleText && (
-  <div style={{ display: 'flex', alignItems: 'center' }}>
+  <div style={{ display: 'flex', alignItems: 'center', paddingTop: '10px'}}>
     <p style={{ marginRight: '10px' }}>
       Selected Rule: <strong>{selectedRuleText}</strong>
     </p>

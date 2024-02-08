@@ -6,7 +6,7 @@ import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import Button from '@mui/material/Button';
+// import Button from '@mui/material/Button';
 import diff from 'diff-match-patch';
 import axios from "axios";
 import OPENAI_API_KEY from "./config/openai";
@@ -361,9 +361,9 @@ class App extends Component {
             <div style={{ display: 'flex', height: '100vh' }}>
 
                 <div style={{ flex: 1, padding: '20px', boxSizing: 'border-box', width: '70%' }}>
-                  <Button variant="outlined" onClick={this.handleRedButton}>
-                  Change Text Color to Red
-                </Button>
+                {/*  <Button variant="outlined" onClick={this.handleRedButton}>*/}
+                {/*  Change Text Color to Red*/}
+                {/*</Button>*/}
                     <FormDialog
                     editorData={this.state.previousSelection} //TODO here implement the selection of the text
                     onApiResponse={this.handleServerResponse}
