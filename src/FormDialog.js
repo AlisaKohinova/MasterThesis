@@ -106,7 +106,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     const selectedColor = formJson.color; // Retrieve selected color
 
     if (!newName.trim()) {
-    const naming_rule_prompt = 'I will give you a rule text, you should return ONLY the short name of this rule (maximum 16 symbols)\n' +
+    const naming_rule_prompt = 'I will give you a rule text, you should return ONLY the short name of this rule (maximum 16 symbols) and corresponding emoji at the start of the name \n' +
         'Here is the rule text: If' + formJson.if_text + ' then ' + formJson.then_text;
 
     try {
