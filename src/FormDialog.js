@@ -22,6 +22,8 @@ export const fixedColors = [
   '#ffad2a',
   '#3cbefc',
   '#77e68a',
+  '#FFD700',
+  '#FF6347',
   '#9d64e2',
   '#fb83b3',
   '#c3effc',
@@ -34,6 +36,8 @@ export const colorsToClean = [
     '#ffad2a',
     '#3cbefc',
     '#77e68a',
+    '#FFD700',
+    '#FF6347',
     '#9d64e2',
     '#fb83b3',
     '#c3effc',
@@ -81,6 +85,8 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
 
 
   const handleClickOpen = () => {
+    const randomIndex = Math.floor(Math.random() * fixedColors.length);
+    setSelectedColor(fixedColors[randomIndex]);
     setOpen(true);
   };
   const handleRevertRule = () => {
