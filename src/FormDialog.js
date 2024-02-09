@@ -464,25 +464,22 @@ const reorder = (list, startIndex, endIndex) => {
 const grid = 8;
 
 const getItemStyle = (isDragging, draggableStyle) => ({
-  // some basic styles to make the items look a bit nicer
   userSelect: 'none',
-  padding: grid * 2,
+  padding: grid * 1.6,
   margin: `0 ${grid}px 0 0`,
-
+  borderRadius: '6px',
   // change background colour if dragging
-  background: isDragging ? 'lightgreen' : 'grey',
+  background: isDragging ? 'lightgreen' : '#f1f1f1',
 
-  // styles we need to apply on draggables
   ...draggableStyle,
 });
 
 const getListStyle = isDraggingOver => ({
-  background: isDraggingOver ? 'lightblue' : 'lightgrey',
+  background: isDraggingOver ? '#D2E3FC' : 'white',
   display: 'flex',
-  padding: grid,
+  borderRadius: '6px',
   overflow: 'auto',
-
-    margin: '0px'
+  padding: '4px' // some padding looks good, but the toolbar takes too much space in a result
 });
 
 const onDragEnd = (result) => {
@@ -490,21 +487,20 @@ const onDragEnd = (result) => {
   if (!result.destination) {
     return;
   }
-
   const items = reorder(
     rules,
     result.source.index,
     result.destination.index
   );
 
-  setRules(items); // Update the state with the reordered items
+  setRules(items);
 };
 
   return (
     <div>
         <div style={{ width: '74%', border: "1px solid lightgrey", borderRadius: '5px', padding: '10px', paddingRight: '5px'}}>
         <ButtonGroup aria-label="primary button group" color="primary" variant="filledTonal">
-        <Button variant="outlined" onClick={handleClickOpen} style={{ borderRadius: '5px',paddingTop: '6px', paddingBottom: '6px', marginRight: '5px'}}>
+        <Button variant="outlined" onClick={handleClickOpen} style={{ borderRadius: '5px', paddingTop: '6px', paddingBottom: '6px', marginRight: '9px'}}>
             +
         </Button>
       <Dialog
@@ -593,7 +589,12 @@ const onDragEnd = (result) => {
         style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
       >
         <div key={index} style={{ alignItems: 'center', borderRadius: '5px', backgroundColor: getColorForRule(rule), marginLeft: '4px', marginRight: '4px' }}>
-          <Button onClick={() => handleButtonClick(`If ${rule.if_text} then ${rule.then_text}`, getColorForRule(rule))} style={{ borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '8px', marginTop: '2px', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={`If ${rule.if_text} then ${rule.then_text}`}>
+          <Button
+                      {...provided.draggableProps}
+
+              {...provided.dragHandleProps}
+              onClick={() => handleButtonClick(`If ${rule.if_text} then ${rule.then_text}`, getColorForRule(rule))}
+              style={{ borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '8px', marginTop: '2px', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={`If ${rule.if_text} then ${rule.then_text}`}>
             {`${rule.name_text.slice(0, 24)}${rule.name_text.length > 24 ? '..' : ''}` || 'Unnamed Rule'}
           </Button>
           <IconButton onClick={() => handleOpenEditDialog(index, rule)} color="white">
