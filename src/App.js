@@ -395,7 +395,7 @@ class App extends Component {
                 {/*  Change Text Color to Red*/}
                 {/*</Button>*/}
                     <FormDialog
-                    editorData={this.state.previousSelection} //TODO here implement the selection of the text
+                    editorData={this.state.previousSelection}
                     onApiResponse={this.handleServerResponse}
                     onRedoRule={this.handleRedo}
                     isRuleRevertDisabled={this.state.ruleRevertDisabled}

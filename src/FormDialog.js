@@ -15,6 +15,7 @@ import OPENAI_API_KEY from "./config/openai";
 import EditIcon from '@mui/icons-material/Edit';
 import CircularProgress from '@mui/material/CircularProgress';
 import MenuItem from '@mui/material/MenuItem'; // Import MenuItem for dropdown
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 let colorIndex = 0;
 const colorMap = {}; // Dictionary to store color assignments
@@ -213,6 +214,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
       // Update existing rule
       const updatedRules = [...rules];
       updatedRules[editingRule.index] = {
+        ...editingRule, // Preserve existing properties of the rule
         name_text: newName,
         if_text: formJson.if_text,
         then_text: formJson.then_text,
@@ -448,6 +450,56 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     }
   };
 
+
+
+// a little function to help us with reordering the result
+const reorder = (list, startIndex, endIndex) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+};
+
+const grid = 8;
+
+const getItemStyle = (isDragging, draggableStyle) => ({
+  // some basic styles to make the items look a bit nicer
+  userSelect: 'none',
+  padding: grid * 2,
+  margin: `0 ${grid}px 0 0`,
+
+  // change background colour if dragging
+  background: isDragging ? 'lightgreen' : 'grey',
+
+  // styles we need to apply on draggables
+  ...draggableStyle,
+});
+
+const getListStyle = isDraggingOver => ({
+  background: isDraggingOver ? 'lightblue' : 'lightgrey',
+  display: 'flex',
+  padding: grid,
+  overflow: 'auto',
+
+    margin: '0px'
+});
+
+const onDragEnd = (result) => {
+  // dropped outside the list
+  if (!result.destination) {
+    return;
+  }
+
+  const items = reorder(
+    rules,
+    result.source.index,
+    result.destination.index
+  );
+
+  setRules(items); // Update the state with the reordered items
+};
+
   return (
     <div>
         <div style={{ width: '74%', border: "1px solid lightgrey", borderRadius: '5px', padding: '10px', paddingRight: '5px'}}>
@@ -523,37 +575,44 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
         </DialogActions>
       </Dialog>
 
+<DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="droppable" direction="horizontal">
+          {(provided, snapshot) => (
+            <div
+              ref={provided.innerRef}
+              style={getListStyle(snapshot.isDraggingOver)}
+              {...provided.droppableProps}
+            >
       {rules.map((rule, index) => (
-
-        <div key={index} style={{  alignItems: 'center',
-            borderRadius: '5px', backgroundColor: getColorForRule(rule),
-    marginLeft: '4px', marginRight: '4px', }}>
-          <Button
-            onClick={() => handleButtonClick(`If ${rule.if_text} then ${rule.then_text}`, getColorForRule(rule))}
-            style={{borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '8px', marginTop: '2px', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
-            title={`If ${rule.if_text} then ${rule.then_text}`} // Set the full text as the title attribute
-          >
+  <Draggable key={index} draggableId={`rule-${index}`} index={index}>
+    {(provided, snapshot, rubric) => (
+      <div
+        ref={provided.innerRef}
+        {...provided.draggableProps}
+        {...provided.dragHandleProps}
+        style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
+      >
+        <div key={index} style={{ alignItems: 'center', borderRadius: '5px', backgroundColor: getColorForRule(rule), marginLeft: '4px', marginRight: '4px' }}>
+          <Button onClick={() => handleButtonClick(`If ${rule.if_text} then ${rule.then_text}`, getColorForRule(rule))} style={{ borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '8px', marginTop: '2px', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={`If ${rule.if_text} then ${rule.then_text}`}>
             {`${rule.name_text.slice(0, 24)}${rule.name_text.length > 24 ? '..' : ''}` || 'Unnamed Rule'}
-
-
           </Button>
-          {/*<IconButton onClick={() => handleDeleteRule(index, rule)} color="error" style={{paddingLeft: '3px'}}>*/}
-          {/*  x*/}
-          {/*</IconButton>*/}
-
-        {/*    <IconButton onClick={() => handleDeleteRule(index, rule)} color="error" style={{ top: "-15px", right: "0",*/}
-        {/*    width: "3px", padding: "0px", margin: "0px"}}>*/}
-        {/*    <CloseIcon />*/}
-        {/*</IconButton>*/}
-        {/*    <IconButton onClick={() => handleDeleteRule(index, rule)} color="error" style={{paddingLeft: '3px'}}>*/}
-        {/*    <DeleteIcon />*/}
-        {/*  </IconButton>*/}
-        <IconButton onClick={() => handleOpenEditDialog(index, rule)} color="white" >
-            <EditIcon style={{ color: 'white', fontSize: '16px'  }} />
-        </IconButton>
-
+          <IconButton onClick={() => handleOpenEditDialog(index, rule)} color="white">
+            <EditIcon style={{ color: 'white', fontSize: '16px' }} />
+          </IconButton>
         </div>
-      ))}
+      </div>
+    )}
+  </Draggable>
+))}                  {provided.placeholder} {/* This line renders the placeholder */}
+
+            </div>
+             )}
+
+        </Droppable>
+</DragDropContext>
+
+
+
       </ButtonGroup>
       </div>
       {selectedRuleText && (
