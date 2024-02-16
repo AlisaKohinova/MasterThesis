@@ -588,14 +588,16 @@ const onDragEnd = (result) => {
         {...provided.dragHandleProps}
         style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
       >
-        <div key={index} style={{ alignItems: 'center', borderRadius: '5px', backgroundColor: getColorForRule(rule), marginLeft: '4px', marginRight: '4px' }}>
+        <div key={index} style={{ height: '36px', alignItems: 'center', padding: '0 8px', flexGrow: 1, display: 'flex', justifyContent: 'space-between', minWidth: '50px',
+      borderRadius: '5px', backgroundColor: getColorForRule(rule), marginLeft: '0px', marginRight: '0px', paddingLeft: '0px', paddingRight: '0px' }}>
           <Button
                       {...provided.draggableProps}
 
               {...provided.dragHandleProps}
               onClick={() => handleButtonClick(`If ${rule.if_text} then ${rule.then_text}`, getColorForRule(rule))}
-              style={{ borderRadius: '5px', color: 'white', fontSize: '12px', paddingRight: '8px', marginTop: '2px', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={`If ${rule.if_text} then ${rule.then_text}`}>
-            {`${rule.name_text.slice(0, 24)}${rule.name_text.length > 24 ? '..' : ''}` || 'Unnamed Rule'}
+              style={{
+borderRadius: '5px', color: 'white', fontSize: '11px', paddingRight: '8px', marginTop: '2px', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={`If ${rule.if_text} then ${rule.then_text}`}>
+            {`${rule.name_text.slice(0, 16)}${rule.name_text.length > 16 ? '..' : ''}` || 'Unnamed Rule'}
           </Button>
           <IconButton onClick={() => handleOpenEditDialog(index, rule)} color="white">
             <EditIcon style={{ color: 'white', fontSize: '16px' }} />
