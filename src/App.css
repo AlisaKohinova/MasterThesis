@@ -2,6 +2,31 @@
 padding: 30px;
 
 }
+/* Style the scrollbar */
+::-webkit-scrollbar {
+  margin-top: 10px;
+  height: 12px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f0f0f0; /* Lighter background color for the track */
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #ccc; /* Lighter color for the handle */
+  border-radius: 10px; /* Rounder corners for the handle */
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #bbb; /* Lighter color for the handle when hovered */
+}
+
+.scrollable-div {
+  overflow-y: auto; /* Enable vertical scrolling */
+}
 
 .suggestionsName {
   padding-left: 30px;

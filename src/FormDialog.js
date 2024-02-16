@@ -84,7 +84,6 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
   const [isLoading, setIsLoading] = useState(false);
   const [selectedColor, setSelectedColor] = useState('#ffad2a'); // State for selected color
 
-
   const handleClickOpen = () => {
     const randomIndex = Math.floor(Math.random() * fixedColors.length);
     setSelectedColor(fixedColors[randomIndex]);
@@ -479,7 +478,7 @@ const getListStyle = isDraggingOver => ({
   display: 'flex',
   borderRadius: '6px',
   overflow: 'auto',
-  padding: '4px' // some padding looks good, but the toolbar takes too much space in a result
+  padding: '4px', // some padding looks good, but the toolbar takes too much space in a result
 });
 
 const onDragEnd = (result) => {
@@ -496,10 +495,11 @@ const onDragEnd = (result) => {
   setRules(items);
 };
 
+
   return (
     <div>
         <div style={{ width: '74%', border: "1px solid lightgrey", borderRadius: '5px', padding: '10px', paddingRight: '5px'}}>
-        <ButtonGroup aria-label="primary button group" color="primary" variant="filledTonal">
+        <ButtonGroup className={"scrollable-div"} aria-label="primary button group" color="primary" variant="filledTonal" style={{ width: '100%'}}>
         <Button variant="outlined" onClick={handleClickOpen} style={{ borderRadius: '5px', paddingTop: '6px', paddingBottom: '6px', marginRight: '9px'}}>
             +
         </Button>
