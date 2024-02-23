@@ -23,12 +23,11 @@ export const fixedColors = [
   '#ffad2a',
   '#3cbefc',
   '#77e68a',
-  '#FFD700',
   '#FF6347',
   '#9d64e2',
   '#fb83b3',
-  '#c3effc',
-  '#FF9999',
+  '#01B8AA',
+  '#FE9666'
   // Add more colors as needed
 ];
 
@@ -37,12 +36,11 @@ export const colorsToClean = [
     '#ffad2a',
     '#3cbefc',
     '#77e68a',
-    '#FFD700',
     '#FF6347',
     '#9d64e2',
     '#fb83b3',
-    '#c3effc',
-    '#FF9999',
+    '#01B8AA',
+    '#FE9666'
 ]
 
 function stripSurroundingText(message) {
