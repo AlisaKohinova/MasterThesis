@@ -42,6 +42,7 @@ export const colorsToClean = [
     '#01B8AA',
     '#FE9666'
 ]
+let LAST_USED_COLOR = '';
 
 function stripSurroundingText(message) {
     return message.replace(/^[^`]*```html\s*|\s*```[^`]*$/g, '');
@@ -83,10 +84,17 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
   const [selectedColor, setSelectedColor] = useState('#ffad2a'); // State for selected color
 
   const handleClickOpen = () => {
-    const randomIndex = Math.floor(Math.random() * fixedColors.length);
+    const availableIndices = fixedColors
+    .map((color, index) => index)
+    .filter(index => index !== LAST_USED_COLOR);
+
+    const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+
     setSelectedColor(fixedColors[randomIndex]);
+    LAST_USED_COLOR = randomIndex;
     setOpen(true);
   };
+
   const handleRevertRule = () => {
     onRedoRule();
   };
@@ -598,7 +606,7 @@ borderRadius: '5px', color: 'white', fontSize: '11px', paddingRight: '8px', marg
             {`${rule.name_text.slice(0, 16)}${rule.name_text.length > 16 ? '..' : ''}` || 'Unnamed Rule'}
           </Button>
           <IconButton onClick={() => handleOpenEditDialog(index, rule)} color="white">
-            <EditIcon style={{ color: 'white', fontSize: '16px' }} />
+            <EditIcon style={{ color: 'white', fontSize: '16px', opacity: '0.5'}} />
           </IconButton>
         </div>
       </div>
