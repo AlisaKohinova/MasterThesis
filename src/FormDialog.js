@@ -498,7 +498,7 @@ const onDragEnd = (result) => {
 
   return (
     <div>
-        <div style={{ width: '74%', border: "1px solid lightgrey", borderRadius: '5px', padding: '10px', paddingRight: '5px'}}>
+        <div style={{ border: "1px solid lightgrey", borderRadius: '5px', padding: '10px', paddingRight: '5px', position: 'fixed', backgroundColor: 'white',width: '72%', zIndex: '1000'}}>
         <ButtonGroup className={"scrollable-div"} aria-label="primary button group" color="primary" variant="filledTonal" style={{ width: '100%'}}>
         <Button variant="outlined" onClick={handleClickOpen} style={{ borderRadius: '5px', paddingTop: '6px', paddingBottom: '6px', marginRight: '9px'}}>
             +
