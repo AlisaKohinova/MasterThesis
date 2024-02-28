@@ -16,6 +16,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import CircularProgress from '@mui/material/CircularProgress';
 import MenuItem from '@mui/material/MenuItem'; // Import MenuItem for dropdown
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { addDataToCSV} from "./App";
 
 let colorIndex = 0;
 const colorMap = {}; // Dictionary to store color assignments
@@ -75,6 +76,9 @@ export function cleanTextFromDifferencesMark(textHtml) {
     return textHtml;
 }
 
+export function countTimeStamp() {
+    return (performance.now()).toString();
+}
 
 export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetRuleRevertDisabled, isRuleRevertDisabled}) {
   const [open, setOpen] = useState(false);
@@ -84,6 +88,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
   const [selectedColor, setSelectedColor] = useState('#ffad2a'); // State for selected color
 
   const handleClickOpen = () => {
+    addDataToCSV(['Create rule - Open dialog', 'CR', countTimeStamp(), 'none'])
     const availableIndices = fixedColors
     .map((color, index) => index)
     .filter(index => index !== LAST_USED_COLOR);
@@ -96,10 +101,12 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
   };
 
   const handleRevertRule = () => {
+    addDataToCSV(['Revert rule', 'RR', countTimeStamp(), 'none'])
     onRedoRule();
   };
 
   const handleClose = () => {
+    addDataToCSV(['Create rule - Close dialog', 'CR', countTimeStamp(), 'none'])
     setOpen(false);
   };
 
@@ -107,14 +114,16 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const formJson = Object.fromEntries(formData.entries());
+    addDataToCSV(['Handle creating rule - Receive Submit', 'HR', countTimeStamp(), JSON.stringify(formJson)])
 
     let newName = formJson.name_text || '';
     const selectedColor = formJson.color; // Retrieve selected color
 
     if (!newName.trim()) {
     const naming_rule_prompt = 'I will give you a rule text, you should return ONLY the short name of this rule (maximum 16 symbols) and corresponding emoji at the start of the name \n' +
-        'Here is the rule text: If' + formJson.if_text + ' then ' + formJson.then_text;
+        'Here is the rule text: If ' + formJson.if_text + ' then ' + formJson.then_text;
 
+    addDataToCSV(['Handle creating rule - API Request - Naming the rule. Start', 'HR', countTimeStamp(), 'If ' + formJson.if_text + ' then ' + formJson.then_text])
     try {
         const response = await axios.post(
           'https://api.openai.com/v1/chat/completions',
@@ -139,7 +148,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
           }
         );
         newName = response.data.choices[0].message.content.replace(/^"|"$/g, '').trim();
-
+        addDataToCSV(['Create rule - API Request - Naming the rule. End', 'HR', countTimeStamp(), newName])
     }
     catch (error) {
       console.error('Error fetching random name:', error);
@@ -530,6 +539,9 @@ const onDragEnd = (result) => {
             name="name_text"
             type="text"
             fullWidth
+            onChange={ (e) => {
+                      addDataToCSV(['Create rule - Change Name Field', 'CR', countTimeStamp(), e.target.value]);
+                    }}
             variant="standard"
           />
               <p>Select Color</p>
@@ -538,7 +550,10 @@ const onDragEnd = (result) => {
                 id="color"
                 name="color"
                 value={selectedColor}
-                onChange={(e) => setSelectedColor(e.target.value)}
+                onChange={(e) => {
+                      addDataToCSV(['Create rule - Choose color', 'CR', countTimeStamp(), selectedColor + ' -> ' + e.target.value]);
+                      setSelectedColor(e.target.value);
+                    }}
                 fullWidth
                 variant="standard"
               >
@@ -558,6 +573,9 @@ const onDragEnd = (result) => {
             type="text"
             fullWidth
             variant="standard"
+            onChange={ (e) => {
+                      addDataToCSV(['Create rule - Change If Field', 'CR', countTimeStamp(), e.target.value]);
+                    }}
           />
           <p>Then</p>
           <TextField
@@ -569,11 +587,20 @@ const onDragEnd = (result) => {
             type="text"
             fullWidth
             variant="standard"
+            onChange={ (e) => {
+                      addDataToCSV(['Create rule - Change Then Field', 'CR', countTimeStamp(), e.target.value]);
+                    }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit">Create</Button>
+          <Button onClick={() => {
+          handleClose();
+           addDataToCSV(['Create rule - Button CANCEL Pressed', 'CR', countTimeStamp(), 'none']);
+        }}>Cancel</Button>
+          <Button type="submit"
+          onClick={() => {
+           addDataToCSV(['Create rule - Button CREATE Pressed', 'CR', countTimeStamp(), 'none']);
+        }}>Create</Button>
         </DialogActions>
       </Dialog>
 

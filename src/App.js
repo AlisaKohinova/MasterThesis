@@ -13,6 +13,18 @@ import OPENAI_API_KEY from "./config/openai";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import IconButton from '@mui/material/IconButton';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
+import {CSVLink} from "react-csv";
+
+export let csvData= [
+  ["name", "class", "timestamp", "details"],
+];
+
+export function addDataToCSV(newData) {
+csvData.push(newData);
+}
+
+// const newData = ["John", "Doe", "john.doe@example.com"];
+// addDataToCSV(newData);
 
 class App extends Component {
 
@@ -440,6 +452,8 @@ class App extends Component {
                     <Drawer anchor="right" variant="permanent" open={isSidebarOpen} sx={{ width: 340, '& .MuiDrawer-paper': { width: '340px !important' } }}>
                         <List style={{paddingTop: '15px'}}>{sidebarContent}</List>
                     </Drawer>
+                    <CSVLink data={csvData}>Download me</CSVLink>;
+
                 </div>
             </div>
             );
