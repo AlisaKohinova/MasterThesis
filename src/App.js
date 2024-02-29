@@ -1,7 +1,7 @@
 import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import React, { Component } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
-import FormDialog, {cleanTextFromDifferencesMark, fixedColors} from "./FormDialog";
+import FormDialog, {cleanTextFromDifferencesMark, countTimeStamp, customStringify, fixedColors} from "./FormDialog";
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -16,7 +16,7 @@ import FileCopyIcon from '@mui/icons-material/FileCopy';
 import {CSVLink} from "react-csv";
 
 export let csvData= [
-  ["name", "class", "timestamp", "details"],
+  ["name", "class", "timestamp", "detail1"],
 ];
 
 export function addDataToCSV(newData) {
@@ -69,7 +69,6 @@ class App extends Component {
 
         this.setState({ serverResponse: responseData });
         this.setState({ filteredJson: filteredJson });
-
         if (this.editor) {
             this.editor.setData(responseData);
             this.setState({ filteredJson: filteredJson});
@@ -77,6 +76,7 @@ class App extends Component {
         if (this.editor) {
             this.editor.setData(this.highlightTextDifferences(this.state.editorData, responseData, color));
         }
+        addDataToCSV(['Display new information', 'DI', countTimeStamp(), 'Editor data: ---' + this.editor.getData() + '--- filteredJson: ' + customStringify(filteredJson, ';')])
         this.setUserChangeFlag(true);
     };
 
@@ -128,11 +128,9 @@ class App extends Component {
         // Update the previous selection for the next comparison
         this.setState({ previousSelection: currentSelection });
         this.SplitAroundSubstring(this.state.editorData, currentSelection)
-
     };
 
   getSelectionText() {
-      // console.log('I WAS CALLED!')
     let selected_text = "";
     if (window.getSelection) {
         selected_text = window.getSelection().toString();
@@ -140,10 +138,9 @@ class App extends Component {
         selected_text = document.selection.createRange().text;
     }
       if (!selected_text) {
-          // console.log('PLAN A', this.state.editorData)
           return this.state.editorData;
       }
-      // console.log('PLAN b', selected_text)
+    // addDataToCSV(['Selection of the text', 'ST', countTimeStamp(), selected_text.toString()])
     return selected_text;
     }
 
@@ -197,6 +194,7 @@ class App extends Component {
             this.editor.setData(this.state.history);
             this.setState({ filteredJson: this.state.historyJson});
         }
+        addDataToCSV(['Handling Redo', 'RR', countTimeStamp(), 'New editorData: ---' + this.state.history + '--- New filteredJson: ---' + customStringify(this.state.historyJson, ';')])
 
         this.setState({ruleRevertDisabled: true})
     };
@@ -227,6 +225,7 @@ class App extends Component {
     };
 
     handleReplaceKey = (key, value) => {
+        addDataToCSV(['Suggestions Block - Replace Key Button Pressed', 'SB', countTimeStamp(), key + ' -> ' + value])
         if (this.editor && key && value) {
             const currentData = this.editor.getData();
 
@@ -247,9 +246,11 @@ class App extends Component {
     };
 
     handleRegenerateKey = async (key, value) => {
+        addDataToCSV(['Suggestions Block - Regenerate Button Pressed', 'SB', countTimeStamp(), key + ' -> ' + value])
         const regeneration_prompt = 'You need to return a synonymic word or phrase. Only return a synonymic word or phrase itself, without ANY additional words.\n' +
             'DO NOT return ' + value +
             '\nWord or phrase: ' + key
+        addDataToCSV(['Handling Suggestions Block - Regenerate Button API Request. Start', 'HSB', countTimeStamp(), value])
         try {
             const response = await axios.post(
               'https://api.openai.com/v1/chat/completions',
@@ -282,12 +283,16 @@ class App extends Component {
                 ...prevState.filteredJson,
                 [key]: regeneration_result,
             },
-            })); } catch (error) {
+            }));
+            addDataToCSV(['Handling Suggestions Block - Regenerate Button API Request. End', 'HSB', countTimeStamp(), 'Old key: ' + key + ' -> New Key: ' + regeneration_result])
+
+        } catch (error) {
             console.error('Error:', error);
           }
     };
 
     copyToClipboard = (value) => {
+        addDataToCSV(['Suggestions Block - Copy to Clipboard Button Pressed', 'SB', countTimeStamp(), value])
         navigator.clipboard.writeText(value)
             .then(() => {
                 console.log('Text copied to clipboard:', value);
@@ -440,6 +445,8 @@ class App extends Component {
                             if (this.isUserChange) {
                             //     const cleanedData = this.overwriteHighlightedAreas(data);
                             // this.setState({ editorData: cleanedData });
+                               addDataToCSV(['Editor Field - User Change', 'EF', countTimeStamp(), data])
+
                             }
                             this.setState({ editorData: data });
                         }}

@@ -16,7 +16,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import CircularProgress from '@mui/material/CircularProgress';
 import MenuItem from '@mui/material/MenuItem'; // Import MenuItem for dropdown
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { addDataToCSV} from "./App";
+import {addDataToCSV, csvData} from "./App";
 
 let colorIndex = 0;
 const colorMap = {}; // Dictionary to store color assignments
@@ -44,6 +44,12 @@ export const colorsToClean = [
     '#FE9666'
 ]
 let LAST_USED_COLOR = '';
+
+export const customStringify = (obj, pairDelimiter) => {
+    return Object.entries(obj)
+        .map(([key, value]) => `${key}:${value}`)
+        .join(pairDelimiter);
+};
 
 function stripSurroundingText(message) {
     return message.replace(/^[^`]*```html\s*|\s*```[^`]*$/g, '');
@@ -101,7 +107,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
   };
 
   const handleRevertRule = () => {
-    addDataToCSV(['Revert rule', 'RR', countTimeStamp(), 'none'])
+    addDataToCSV(['Button REVERT RULE pressed', 'RR', countTimeStamp(), 'none'])
     onRedoRule();
   };
 
@@ -114,8 +120,9 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const formJson = Object.fromEntries(formData.entries());
-    addDataToCSV(['Handle creating rule - Receive Submit', 'HR', countTimeStamp(), JSON.stringify(formJson)])
+    addDataToCSV(['Handle creating rule - Receive Submit', 'HR', countTimeStamp(), customStringify(formJson, ';')])
 
+    console.log(csvData)
     let newName = formJson.name_text || '';
     const selectedColor = formJson.color; // Retrieve selected color
 
@@ -171,18 +178,21 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
   const handleOpenEditDialog = (index, rule) => {
     setEditingRule({ index, ...rule });
     setEditDialogOpen(true);
+    addDataToCSV(['Edit rule - Open Edit dialog', 'ER', countTimeStamp(), 'If ' + rule.if_text + ' then '+ rule.then_text])
   };
 
   const handleCloseEditDialog = () => {
     setEditingRule(null);
     setEditDialogOpen(false);
+    addDataToCSV(['Edit rule - Close Edit dialog', 'ER', countTimeStamp(), 'none'])
   };
 
   const handleEditRule = async (event) => {
-      console.log('editing')
+    console.log('editing')
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const formJson = Object.fromEntries(formData.entries());
+    addDataToCSV(['Handle editing rule - Receive Edit Submit', 'HER', countTimeStamp(), customStringify(formJson, ';')])
 
     let newName = formJson.name_text || '';
 
@@ -194,6 +204,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
         ' then ' +
         formJson.then_text;
 
+      addDataToCSV(['Handle editing rule - API Request - Naming the rule. Start', 'HER', countTimeStamp(), 'If ' + formJson.if_text + ' then ' + formJson.then_text])
       try {
         const response = await axios.post(
           'https://api.openai.com/v1/chat/completions',
@@ -218,6 +229,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
           }
         );
         newName = response.data.choices[0].message.content.replace(/^"|"$/g, '').trim();
+        addDataToCSV(['Handle editing rule - API Request - Naming the rule. End', 'HER', countTimeStamp(), newName])
 
       } catch (error) {
         console.error('Error fetching random name:', error);
@@ -255,9 +267,11 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
       delete colorMap[editingRule.if_text + editingRule.then_text];
       handleCloseEditDialog();
     }
+    addDataToCSV(['Edit rule - DELETE rule pressed', 'ER', countTimeStamp(), 'none'])
   };
 
   const handleButtonClick = async(ruleText, color) => {
+    addDataToCSV(['Process rule - Receive Pressed Rule', 'PR', countTimeStamp(), 'Rule text: ' + ruleText + ' Editor Data: ' + editorData])
     setSelectedRuleText(ruleText);
     onSetRuleRevertDisabled(false);
 
@@ -285,6 +299,8 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
           'If the rule\'s goal is to return feedback, opinion to user or instructions for text improvement, then it\'s class Feedback.\n' +
           'You must only return the name of the selected Class.\n' +
           '\nHere is the rule:' + ruleText
+
+    addDataToCSV(['Process rule - Rule Classification. Start', 'PR', countTimeStamp(), 'none'])
     try {
         const response = await axios.post(
           'https://api.openai.com/v1/chat/completions',
@@ -311,6 +327,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
         console.log(response.data);
         console.log(response.data.choices[0].message.content);
         classificationResult = response.data.choices[0].message.content.toLowerCase();
+        addDataToCSV(['Process rule - Rule Classification. END', 'PR', countTimeStamp(), classificationResult])
       } catch (error) {
         console.error('Error:', error);
       }
@@ -318,6 +335,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
       if (classificationResult.includes('changing'))
       {
           // Changing task
+          addDataToCSV(['Process rule - Changing Task Request. Start', 'PR', countTimeStamp(), 'none'])
           console.log('changing task')
           const prompt = 'The next is the text we are working on: ' + editorData + '   \nThe rule for modifying the text is: ' + ruleText + '   \n Only return me the modified text without any explanations. Only pure HTML text'
           try {
@@ -348,6 +366,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
         const responseData = stripSurroundingText(response.data.choices[0].message.content);
         const filteredJson = {}
         onApiResponse(responseData, filteredJson, color);
+        addDataToCSV(['Process rule - Changing Task Request. End', 'PR', countTimeStamp(), 'ResponseData: ' + responseData])
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -356,6 +375,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
       }
       else if (classificationResult.includes('suggestions'))
       {
+          addDataToCSV(['Process rule - Suggestions Task Request. Start', 'PR', countTimeStamp(), 'none'])
           console.log('Suggestions task')
           const suggestions_prompt = 'The text: ' + editorData + '\nThe task: ' + ruleText + '\nReturn the dictionary of original text parts mapped to suggestions in JSON format. JSON cannot be nested'
           try {
@@ -395,7 +415,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
         ));
         console.log(jsonObject)
         onApiResponse(editorData, filteredJson, color);
-
+        addDataToCSV(['Process rule - Suggestions Task Request. End', 'PR', countTimeStamp(), 'filteredJson: ' + customStringify(filteredJson, ';')])
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -403,6 +423,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
       }
       }
       else {
+        addDataToCSV(['Process rule - Feedback Task Request. Start', 'PR', countTimeStamp(), 'none'])
         console.log('Feedback task')
           const feedback_prompt = 'The text: ' + editorData + '\nThe task: ' + ruleText
           try {
@@ -432,6 +453,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
         console.log(response.data.choices[0].message.content);
         const filteredJson = {'Feedback': response.data.choices[0].message.content}
         onApiResponse(editorData, filteredJson, color);
+        addDataToCSV(['Process rule - Feedback Task Request. End', 'PR', countTimeStamp(), 'filteredJson: ' + customStringify(filteredJson, ';')])
 
       } catch (error) {
         console.error('Error:', error);
@@ -464,10 +486,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     }
   };
 
-
-
-// a little function to help us with reordering the result
-const reorder = (list, startIndex, endIndex) => {
+  const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
@@ -506,6 +525,8 @@ const onDragEnd = (result) => {
     result.source.index,
     result.destination.index
   );
+  const draggedRule = rules[result.source.index];
+  addDataToCSV(['Dragging elements', 'DE', countTimeStamp(), 'Button with rule: ---' + draggedRule.name_text + '--- was dragged from index ' + result.source.index + ' to index ' + result.destination.index])
 
   setRules(items);
 };
@@ -690,6 +711,9 @@ borderRadius: '5px', color: 'white', fontSize: '11px', paddingRight: '3px', marg
             defaultValue={editingRule ? editingRule.name_text : ''}
             fullWidth
             variant="standard"
+            onChange={ (e) => {
+                      addDataToCSV(['Edit rule - Change Name Field', 'ER', countTimeStamp(), e.target.value]);
+                    }}
           />
           <p>If</p>
           <TextField
@@ -702,6 +726,9 @@ borderRadius: '5px', color: 'white', fontSize: '11px', paddingRight: '3px', marg
             defaultValue={editingRule ? editingRule.if_text : ''}
             fullWidth
             variant="standard"
+            onChange={ (e) => {
+                      addDataToCSV(['Edit rule - Change If Field', 'ER', countTimeStamp(), e.target.value]);
+                    }}
           />
           <p>Then</p>
           <TextField
@@ -714,6 +741,9 @@ borderRadius: '5px', color: 'white', fontSize: '11px', paddingRight: '3px', marg
             defaultValue={editingRule ? editingRule.then_text : ''}
             fullWidth
             variant="standard"
+            onChange={ (e) => {
+                      addDataToCSV(['Edit rule - Change Then Field', 'ER', countTimeStamp(), e.target.value]);
+                    }}
           />
         </DialogContent>
         <DialogActions >
@@ -724,8 +754,9 @@ borderRadius: '5px', color: 'white', fontSize: '11px', paddingRight: '3px', marg
             </Button>
           )}
             <Button onClick={handleCloseEditDialog}>Cancel</Button>
-          <Button type="submit">Save Changes</Button>
-
+          <Button type="submit" onClick={() => {
+           addDataToCSV(['Edit rule - Button SAVE CHANGES Pressed', 'ER', countTimeStamp(), 'none']);
+        }}>Save Changes</Button>
         </DialogActions>
       </Dialog>
     </div>
