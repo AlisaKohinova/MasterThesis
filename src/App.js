@@ -107,12 +107,20 @@ class App extends Component {
     componentDidMount() {
         // Add event listener when the component mounts
         document.addEventListener('mouseup', this.handleTextSelection);
+        window.addEventListener('beforeunload', this.handleBeforeUnload);
     }
 
     componentWillUnmount() {
         // Remove event listener when the component unmounts
         document.removeEventListener('mouseup', this.handleTextSelection);
+        window.removeEventListener('beforeunload', this.handleBeforeUnload);
     }
+
+    handleBeforeUnload = (e) => {
+        const message = 'Are you sure you want to leave?';
+        e.returnValue = message;
+        return message;
+    };
 
     handleTextSelection = () => {
         const currentSelection = this.getSelectionText();
