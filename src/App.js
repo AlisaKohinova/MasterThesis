@@ -48,6 +48,7 @@ class App extends Component {
         };
     }
 
+
     ckeditorRef = React.createRef();
     handleSetRuleRevertDisabled = (value) => {
         this.setState({ ruleRevertDisabled: value });
@@ -76,7 +77,8 @@ class App extends Component {
         if (this.editor) {
             this.editor.setData(this.highlightTextDifferences(this.state.editorData, responseData, color));
         }
-        addDataToCSV(['Display new information', 'DI', countTimeStamp(), 'Editor data: ---' + this.editor.getData() + '--- filteredJson: ' + customStringify(filteredJson, ';')])
+        addDataToCSV(['Display new information', 'DI', countTimeStamp(), 'Editor data: ---' + this.editor.getData().replace(/"|”|;/g, '||') + '--- filteredJson: ' + customStringify(filteredJson, ';').replace(/"|”|;/g, '||')])
+        console.log(this.editor.getData().replace(/"|”|;/g, '||'))
         this.setUserChangeFlag(true);
     };
 
@@ -194,7 +196,7 @@ class App extends Component {
             this.editor.setData(this.state.history);
             this.setState({ filteredJson: this.state.historyJson});
         }
-        addDataToCSV(['Handling Redo', 'RR', countTimeStamp(), 'New editorData: ---' + this.state.history + '--- New filteredJson: ---' + customStringify(this.state.historyJson, ';')])
+        addDataToCSV(['Handling Redo', 'RR', countTimeStamp(), 'New editorData: ---' + this.state.history.replace(/"/g, '||') + '--- New filteredJson: ---' + customStringify(this.state.historyJson, ';')])
 
         this.setState({ruleRevertDisabled: true})
     };
@@ -225,7 +227,7 @@ class App extends Component {
     };
 
     handleReplaceKey = (key, value) => {
-        addDataToCSV(['Suggestions Block - Replace Key Button Pressed', 'SB', countTimeStamp(), key + ' -> ' + value])
+        addDataToCSV(['Suggestions Block - Replace Key Button Pressed', 'SB', countTimeStamp(), key.replace(/"/g, '||') + ' -> ' + value.replace(/"/g, '||')])
         if (this.editor && key && value) {
             const currentData = this.editor.getData();
 
@@ -246,11 +248,11 @@ class App extends Component {
     };
 
     handleRegenerateKey = async (key, value) => {
-        addDataToCSV(['Suggestions Block - Regenerate Button Pressed', 'SB', countTimeStamp(), key + ' -> ' + value])
+        addDataToCSV(['Suggestions Block - Regenerate Button Pressed', 'SB', countTimeStamp(), key.replace(/"/g, '||') + ' -> ' + value.replace(/"/g, '||')])
         const regeneration_prompt = 'You need to return a synonymic word or phrase. Only return a synonymic word or phrase itself, without ANY additional words.\n' +
             'DO NOT return ' + value +
             '\nWord or phrase: ' + key
-        addDataToCSV(['Handling Suggestions Block - Regenerate Button API Request. Start', 'HSB', countTimeStamp(), value])
+        addDataToCSV(['Handling Suggestions Block - Regenerate Button API Request. Start', 'HSB', countTimeStamp(), value.replace(/"/g, '||')])
         try {
             const response = await axios.post(
               'https://api.openai.com/v1/chat/completions',
@@ -284,7 +286,7 @@ class App extends Component {
                 [key]: regeneration_result,
             },
             }));
-            addDataToCSV(['Handling Suggestions Block - Regenerate Button API Request. End', 'HSB', countTimeStamp(), 'Old key: ' + key + ' -> New Key: ' + regeneration_result])
+            addDataToCSV(['Handling Suggestions Block - Regenerate Button API Request. End', 'HSB', countTimeStamp(), 'Old key: ' + key.replace(/"/g, '||') + ' -> New Key: ' + regeneration_result.replace(/"/g, '||')])
 
         } catch (error) {
             console.error('Error:', error);
@@ -292,7 +294,7 @@ class App extends Component {
     };
 
     copyToClipboard = (value) => {
-        addDataToCSV(['Suggestions Block - Copy to Clipboard Button Pressed', 'SB', countTimeStamp(), value])
+        addDataToCSV(['Suggestions Block - Copy to Clipboard Button Pressed', 'SB', countTimeStamp(), value.replace(/"/g, '||')])
         navigator.clipboard.writeText(value)
             .then(() => {
                 console.log('Text copied to clipboard:', value);
@@ -441,12 +443,11 @@ class App extends Component {
 
                         onChange={(event, editor) => {
                             const data = editor.getData();
+                            addDataToCSV(['Editor Field - Change', 'EF', countTimeStamp(), data.replace(/"|”|;/g, '||')]);
                             // const cleanedData = this.overwriteHighlightedAreas(data);
                             if (this.isUserChange) {
                             //     const cleanedData = this.overwriteHighlightedAreas(data);
                             // this.setState({ editorData: cleanedData });
-                               addDataToCSV(['Editor Field - User Change', 'EF', countTimeStamp(), data])
-
                             }
                             this.setState({ editorData: data });
                         }}
@@ -459,7 +460,9 @@ class App extends Component {
                     <Drawer anchor="right" variant="permanent" open={isSidebarOpen} sx={{ width: 340, '& .MuiDrawer-paper': { width: '340px !important' } }}>
                         <List style={{paddingTop: '15px'}}>{sidebarContent}</List>
                     </Drawer>
-                    <CSVLink data={csvData}>Download me</CSVLink>;
+                    <CSVLink data={csvData}
+                     className="download-link-hidden"
+                    >Download</CSVLink>
 
                 </div>
             </div>

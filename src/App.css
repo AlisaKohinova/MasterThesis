@@ -2,6 +2,21 @@
 padding: 30px;
 
 }
+
+.download-link-hidden {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  color: grey;
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.download-link-hidden:hover {
+  opacity: 1;
+}
+
 /* Style the scrollbar */
 ::-webkit-scrollbar {
   margin-top: 10px;
