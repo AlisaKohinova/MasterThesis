@@ -130,7 +130,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     const naming_rule_prompt = 'I will give you a rule text, you should return ONLY the short name of this rule (maximum 16 symbols) and corresponding emoji at the start of the name \n' +
         'Here is the rule text: If ' + formJson.if_text + ' then ' + formJson.then_text;
 
-    addDataToCSV(['Handle creating rule - API Request - Naming the rule. Start', 'HR', countTimeStamp(), 'If ' + formJson.if_text.replace(/"/g, '||') + ' then ' + formJson.then_text.replace(/"/g, '||')])
+    addDataToCSV(['Handle creating rule - API Request - Naming the rule. Start', 'HR', countTimeStamp(), 'none'])
     try {
         const response = await axios.post(
           'https://api.openai.com/v1/chat/completions',
@@ -155,7 +155,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
           }
         );
         newName = response.data.choices[0].message.content.replace(/^"|"$/g, '').trim();
-        addDataToCSV(['Create rule - API Request - Naming the rule. End', 'HR', countTimeStamp(), newName.replace(/"/g, '||')])
+        addDataToCSV(['Create rule - API Request - Naming the rule. End', 'HR', countTimeStamp(), 'none'])
     }
     catch (error) {
       console.error('Error fetching random name:', error);
@@ -178,7 +178,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
   const handleOpenEditDialog = (index, rule) => {
     setEditingRule({ index, ...rule });
     setEditDialogOpen(true);
-    addDataToCSV(['Edit rule - Open Edit dialog', 'ER', countTimeStamp(), 'If ' + rule.if_text.replace(/"/g, '||') + ' then '+ rule.then_text.replace(/"/g, '||')])
+    addDataToCSV(['Edit rule - Open Edit dialog', 'ER', countTimeStamp(), 'none'])
   };
 
   const handleCloseEditDialog = () => {
@@ -192,7 +192,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const formJson = Object.fromEntries(formData.entries());
-    addDataToCSV(['Handle editing rule - Receive Edit Submit', 'HER', countTimeStamp(), customStringify(formJson, ';')])
+    addDataToCSV(['Handle editing rule - Receive Edit Submit', 'HER', countTimeStamp(), 'none'])
 
     let newName = formJson.name_text || '';
 
@@ -204,7 +204,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
         ' then ' +
         formJson.then_text;
 
-      addDataToCSV(['Handle editing rule - API Request - Naming the rule. Start', 'HER', countTimeStamp(), 'If ' + formJson.if_text.replace(/"/g, '||') + ' then ' + formJson.then_text.replace(/"/g, '||')])
+      addDataToCSV(['Handle editing rule - API Request - Naming the rule. Start', 'HER', countTimeStamp(), 'none'])
       try {
         const response = await axios.post(
           'https://api.openai.com/v1/chat/completions',
@@ -229,7 +229,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
           }
         );
         newName = response.data.choices[0].message.content.replace(/^"|"$/g, '').trim();
-        addDataToCSV(['Handle editing rule - API Request - Naming the rule. End', 'HER', countTimeStamp(), newName.replace(/"/g, '||')])
+        addDataToCSV(['Handle editing rule - API Request - Naming the rule. End', 'HER', countTimeStamp(), 'none'])
 
       } catch (error) {
         console.error('Error fetching random name:', error);
@@ -271,7 +271,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
   };
 
   const handleButtonClick = async(ruleText, color) => {
-    addDataToCSV(['Process rule - Receive Pressed Rule', 'PR', countTimeStamp(), 'Rule text: ' + ruleText.replace(/"/g, '||') + ' Editor Data: ' + editorData.replace(/"/g, '||')])
+    addDataToCSV(['Process rule - Receive Pressed Rule', 'PR', countTimeStamp(), 'Rule text: ' + ruleText.replace(/"/g, '||')])
     setSelectedRuleText(ruleText);
     onSetRuleRevertDisabled(false);
 
@@ -366,7 +366,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
         const responseData = stripSurroundingText(response.data.choices[0].message.content);
         const filteredJson = {}
         onApiResponse(responseData, filteredJson, color);
-        addDataToCSV(['Process rule - Changing Task Request. End', 'PR', countTimeStamp(), 'ResponseData: ' + responseData.replace(/"/g, '||')])
+        addDataToCSV(['Process rule - Changing Task Request. End', 'PR', countTimeStamp(), 'none'])
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -415,7 +415,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
         ));
         console.log(jsonObject)
         onApiResponse(editorData, filteredJson, color);
-        addDataToCSV(['Process rule - Suggestions Task Request. End', 'PR', countTimeStamp(), 'filteredJson: ' + customStringify(filteredJson, ';')])
+        addDataToCSV(['Process rule - Suggestions Task Request. End', 'PR', countTimeStamp(), 'none'])
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -453,7 +453,7 @@ export default function FormDialog({editorData,onApiResponse, onRedoRule, onSetR
         console.log(response.data.choices[0].message.content);
         const filteredJson = {'Feedback': response.data.choices[0].message.content}
         onApiResponse(editorData, filteredJson, color);
-        addDataToCSV(['Process rule - Feedback Task Request. End', 'PR', countTimeStamp(), 'filteredJson: ' + customStringify(filteredJson, ';')])
+        addDataToCSV(['Process rule - Feedback Task Request. End', 'PR', countTimeStamp(), 'none'])
 
       } catch (error) {
         console.error('Error:', error);

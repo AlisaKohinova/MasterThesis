@@ -1,7 +1,7 @@
 import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import React, { Component } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
-import FormDialog, {cleanTextFromDifferencesMark, countTimeStamp, customStringify, fixedColors} from "./FormDialog";
+import FormDialog, {cleanTextFromDifferencesMark, countTimeStamp, fixedColors} from "./FormDialog";
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -25,14 +25,13 @@ csvData.push(newData);
 
 // const newData = ["John", "Doe", "john.doe@example.com"];
 // addDataToCSV(newData);
-
 class App extends Component {
 
     editor = null;
     constructor(props) {
         super(props);
         this.state = {
-            editorData: "<p>Hello from CKEditor 5!</p>",
+            editorData: "<p>START In the dimly lit basemnt of a old Victorian mansion, 6 buddies gathered around a worn oak table for their weekly poker night. The air was thick with excitement as the cards were shuffld, chips clinking against one another in a rhythmic cadence. With each hand dealt, tension mounted, the stakes growing higher with every wager. As the clock struck midnight, the game reached its culmination, with only 2 players left standing—Jack, the seasoned veteran with nerves of steel, and Emily, the dark horse with a penchant for calculated risks. With a smug grin, Jack revealed his hand, a royal flush that seemed unbeataible. But Emily remained unfazed, her expression inscrutable as she laid down her cards—a straight flush, the winning hand. Cheers erupted as Emily snagged the victory, her triumph echoing through the halls of the mansion. As the night drew to a close, the friends parted ways, their bond strengthened by another unforgettable poker night showdown. And amidst the laughter and companionship, they knew that no matter the outcome, their friendship would persist, a timeless treasure in a world of fleeting fortunes.</p>",
             appDisplayText: '',
             serverResponse: '',
             isSidebarOpen: true,
@@ -77,8 +76,7 @@ class App extends Component {
         if (this.editor) {
             this.editor.setData(this.highlightTextDifferences(this.state.editorData, responseData, color));
         }
-        addDataToCSV(['Display new information', 'DI', countTimeStamp(), 'Editor data: ---' + this.editor.getData().replace(/"|”|;/g, '||') + '--- filteredJson: ' + customStringify(filteredJson, ';').replace(/"|”|;/g, '||')])
-        console.log(this.editor.getData().replace(/"|”|;/g, '||'))
+        addDataToCSV(['Display new information', 'DI', countTimeStamp(), 'none'])
         this.setUserChangeFlag(true);
     };
 
@@ -204,7 +202,7 @@ class App extends Component {
             this.editor.setData(this.state.history);
             this.setState({ filteredJson: this.state.historyJson});
         }
-        addDataToCSV(['Handling Redo', 'RR', countTimeStamp(), 'New editorData: ---' + this.state.history.replace(/"/g, '||') + '--- New filteredJson: ---' + customStringify(this.state.historyJson, ';')])
+        addDataToCSV(['Handling Redo', 'RR', countTimeStamp(), 'none'])
 
         this.setState({ruleRevertDisabled: true})
     };
@@ -235,7 +233,7 @@ class App extends Component {
     };
 
     handleReplaceKey = (key, value) => {
-        addDataToCSV(['Suggestions Block - Replace Key Button Pressed', 'SB', countTimeStamp(), key.replace(/"/g, '||') + ' -> ' + value.replace(/"/g, '||')])
+        addDataToCSV(['Suggestions Block - Replace Key Button Pressed', 'SB', countTimeStamp(), 'none'])
         if (this.editor && key && value) {
             const currentData = this.editor.getData();
 
@@ -256,11 +254,11 @@ class App extends Component {
     };
 
     handleRegenerateKey = async (key, value) => {
-        addDataToCSV(['Suggestions Block - Regenerate Button Pressed', 'SB', countTimeStamp(), key.replace(/"/g, '||') + ' -> ' + value.replace(/"/g, '||')])
+        addDataToCSV(['Suggestions Block - Regenerate Button Pressed', 'SB', countTimeStamp(), 'none'])
         const regeneration_prompt = 'You need to return a synonymic word or phrase. Only return a synonymic word or phrase itself, without ANY additional words.\n' +
             'DO NOT return ' + value +
             '\nWord or phrase: ' + key
-        addDataToCSV(['Handling Suggestions Block - Regenerate Button API Request. Start', 'HSB', countTimeStamp(), value.replace(/"/g, '||')])
+        addDataToCSV(['Handling Suggestions Block - Regenerate Button API Request. Start', 'HSB', countTimeStamp(), 'none'])
         try {
             const response = await axios.post(
               'https://api.openai.com/v1/chat/completions',
@@ -294,7 +292,7 @@ class App extends Component {
                 [key]: regeneration_result,
             },
             }));
-            addDataToCSV(['Handling Suggestions Block - Regenerate Button API Request. End', 'HSB', countTimeStamp(), 'Old key: ' + key.replace(/"/g, '||') + ' -> New Key: ' + regeneration_result.replace(/"/g, '||')])
+            addDataToCSV(['Handling Suggestions Block - Regenerate Button API Request. End', 'HSB', countTimeStamp(), 'none'])
 
         } catch (error) {
             console.error('Error:', error);
@@ -302,7 +300,7 @@ class App extends Component {
     };
 
     copyToClipboard = (value) => {
-        addDataToCSV(['Suggestions Block - Copy to Clipboard Button Pressed', 'SB', countTimeStamp(), value.replace(/"/g, '||')])
+        addDataToCSV(['Suggestions Block - Copy to Clipboard Button Pressed', 'SB', countTimeStamp(), 'none'])
         navigator.clipboard.writeText(value)
             .then(() => {
                 console.log('Text copied to clipboard:', value);
@@ -451,7 +449,7 @@ class App extends Component {
 
                         onChange={(event, editor) => {
                             const data = editor.getData();
-                            addDataToCSV(['Editor Field - Change', 'EF', countTimeStamp(), data.replace(/"|”|;/g, '||')]);
+                            addDataToCSV(['Editor Field - Change', 'EF', countTimeStamp(), 'none']);
                             // const cleanedData = this.overwriteHighlightedAreas(data);
                             if (this.isUserChange) {
                             //     const cleanedData = this.overwriteHighlightedAreas(data);
